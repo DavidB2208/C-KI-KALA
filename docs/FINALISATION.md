@@ -40,3 +40,7 @@ Publicités, parrainage récompensé, marketplace, sponsors, chat public, classe
 Le dépôt GitHub est le point de collaboration de l’équipe. Sites garde son dépôt technique de publication ; les deux instantanés de source sont synchronisés pendant cette livraison. **Un push GitHub ne met pas automatiquement le site en ligne.** Ne pas ajouter de clé de déploiement ni de jeton Sites au dépôt. Le workflow CI se limite aux vérifications.
 
 L’ancien prototype reste consultable dans sa branche d’archive. Ses instructions PeerJS/Supabase ne s’appliquent pas à la plateforme D1 et ne doivent pas être exécutées sur sa base. La note historique demandant de modifier une tier-list est couverte pendant la préparation du vote ; une fois validé, le bulletin est scellé pour préserver l’équité.
+
+Adresse du jeu : https://c-ki-kala.davekawaii.chatgpt.site. GitHub Pages, encore actif pour le dépôt historique, ne peut servir qu’une page statique et n’héberge pas cette application avec comptes et D1.
+
+Preuve de CI : le commit `46b8c1197d9bafc3863c027c812f178ef5f109ed` a réussi le workflow « Verify C KI KA LA » (installation indépendante, types, compilation, 7 tests moteur, 153 assertions jeu/social et 40 assertions Stripe simulées) : https://github.com/DavidB2208/C-KI-KALA/actions/runs/36245860268. Les ajouts suivants à ce document précisent uniquement la livraison et ne remplacent pas le statut de leur propre commit.

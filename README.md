@@ -96,4 +96,8 @@ Les détails et limites sont dans [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md). 
 
 Dépôt : https://github.com/DavidB2208/C-KI-KALA ; l’ancien prototype PeerJS/Supabase est conservé sur `archive/prototype-before-platform`. `main` contient la plateforme D1. Le workflow GitHub Actions compile et teste le jeu sans secret de production ni transaction Stripe réelle ; il ne déploie pas automatiquement.
 
+Jeu en ligne : https://c-ki-kala.davekawaii.chatgpt.site
+
+L’ancien déploiement GitHub Pages peut encore publier une page statique du dépôt. Il ne peut pas exécuter le Worker, les comptes ni la base D1 de cette plateforme. Utiliser l’adresse du jeu ci-dessus ; le statut vert de « pages build and deployment » ne valide pas le fonctionnement du jeu.
+
 Voir [docs/FINALISATION.md](docs/FINALISATION.md) pour les éléments achevés, les décisions écartées et les seules étapes qui nécessitent encore l’équipe ou un compte prestataire. Les guides v3/v4 sont historiques.
