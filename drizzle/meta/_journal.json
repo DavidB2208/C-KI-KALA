@@ -1,0 +1,41 @@
+{
+  "version": "7",
+  "dialect": "sqlite",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "6",
+      "when": 1789111509133,
+      "tag": "0000_parched_talon",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1790189455443,
+      "tag": "0001_amusing_ser_duncan",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1790318638381,
+      "tag": "0002_hard_mindworm",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1790337893961,
+      "tag": "0003_third_silver_centurion",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "6",
+      "when": 1790337993882,
+      "tag": "0004_empty_cardiac",
+      "breakpoints": true
+    }
+  ]
+}

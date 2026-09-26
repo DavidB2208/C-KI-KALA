@@ -1,0 +1,69 @@
+/** Real Worker/D1 regression cases. Caller supplies isolated test clients only. */
+export async function socialCases({Client,check,inspect}){
+ const a=new Client(),b=new Client(),c=new Client(),outside=new Client(),guest=new Client();
+ for(const [p,n] of [[a,'Squad Alice'],[b,'Squad Bob'],[c,'Squad Chloe'],[outside,'Squad Externe']])await p.register(n);
+ await guest.ok('profile','POST',{name:'Squad Invite'});
+ check('Guests may play but cannot create permanent groups',(await guest.call('squads','POST',{name:'Squad'})).status===401);
+ const group=(await a.ok('squads','POST',{name:'La bande',description:'Nos soirées'})).id;
+ check('Squad starts with owner only',(await a.ok('squads/'+group)).members.length===1);
+ check('Group has no public listing or readable details',(await outside.call('squads/'+group)).status===404&&(await outside.ok('squads')).squads.length===0);
+ const invite=(await a.ok('squads/'+group+'/invite','POST')).token;
+ check('Invitation stored only as hash',(await inspect('SELECT token_hash FROM squad_invites WHERE squad_id=?',group))[0].token_hash!==invite);
+ await b.ok('squads/join','POST',{token:invite});await c.ok('squads/join','POST',{token:invite});
+ check('Members cannot generate invitations',(await b.call('squads/'+group+'/invite','POST')).status===403);
+ await a.ok('squads/'+group+'/revoke-invite','POST');
+ check('Revoked invitations cannot join',(await outside.call('squads/join','POST',{token:invite})).status===404);
+ const deck=(await a.ok('decks','POST',{name:'Questions maison',questions:['Qui ramènerait douze desserts ?','Qui perdrait le plan du groupe ?']})).id;
+ check('Decks remain private',(await b.ok('decks')).decks.length===0&&(await b.call('decks','POST',{id:deck,name:'Vol',questions:['Une autre question ?']})).status===404);
+ check('Duplicate questions rejected',(await a.call('decks','POST',{name:'Doublon',questions:['Qui adore les chats ?','qui adore les chats ?']})).status===400);
+ const settings={pack:'classique',roundCount:3,duration:120,themeMode:'deck',deckId:deck,squadId:group};
+ check('Foreign deck cannot create a room',(await b.call('rooms','POST',settings)).status===404);
+ check('Group association requires membership',(await outside.call('rooms','POST',{pack:'classique',roundCount:1,duration:120,squadId:group})).status===403);
+ check('Premium pack protected on server',(await a.call('rooms','POST',{pack:'anime',roundCount:1,duration:120})).status===402);
+ check('Paid theme protected on server',(await a.call('rooms','POST',{pack:'classique',roundCount:1,duration:120,visualTheme:'sunset'})).status===402);
+ check('Forged paid access rejected',(await a.call('rooms','POST',{pack:'anime',roundCount:1,duration:120,premium:true})).status===400);
+ check('Billing is off until configured',!(await a.ok('billing/catalog')).ready&&(await a.call('billing/checkout','POST',{sku:'party',acceptTerms:true})).status===503);
+ const path='rooms/'+(await a.ok('rooms','POST',settings)).code;
+ await b.ok(path+'/join','POST');await c.ok(path+'/join','POST');
+ const s=await a.ok(path);check('Deck snapshots have bounded rounds and group',s.roundCount===2&&s.deckName==='Questions maison'&&s.squad.id===group);
+ await a.ok('decks/'+deck,'DELETE');
+ await a.ok(path+'/start','POST');
+ check('Deck questions survive deck deletion',(await a.ok(path)).question.length>6);
+ check('Sharing consent forbidden during play',(await a.call(path+'/squad-consent','POST',{agree:true})).status===409);
+ for(let round=1;round<=2;round++){
+  for(const p of [a,b,c]){const room=await p.ok(path);await p.ok(path+'/vote','POST',{round,rankings:Object.fromEntries(room.targets.filter(t=>t.id!==room.me).map((t,i)=>[t.id,i?null:5]))});}
+  await a.ok(path+'/next','POST',{round});
+ }
+ check('Completed group game private by default',(await a.ok('squads/'+group)).games.length===0);
+ await a.ok(path+'/squad-consent','POST',{agree:true});await b.ok(path+'/squad-consent','POST',{agree:true});
+ check('Unanimous consent required',(await a.ok('squads/'+group)).games.length===0);
+ await c.ok(path+'/squad-consent','POST',{agree:true});
+ const shared=await a.ok('squads/'+group);
+ check('All consent makes aggregate visible',shared.games.length===1&&shared.scoreboard.length===3&&shared.memories.length===2);
+ check('Unranked targets excluded from group averages',shared.scoreboard.filter(p=>p.received>0).every(p=>p.average===5));
+ await b.ok(path+'/squad-consent','POST',{agree:false});check('Consent withdrawal immediately hides group game',(await a.ok('squads/'+group)).games.length===0);
+ await b.ok(path+'/squad-consent','POST',{agree:true});
+ const token=(await a.ok('squads/'+group+'/invite','POST')).token;await outside.ok('squads/join','POST',{token});
+ check('New group member sees aggregate but not private room',(await outside.ok('squads/'+group)).games.length===1&&(await outside.call(path)).status===403);
+ const bId=(await b.ok('me')).profile.id;
+ await a.ok('squads/'+group+'/kick','POST',{profileId:bId});
+ check('Kicking removes access and old consent',(await b.call('squads/'+group)).status===404&&(await a.ok('squads/'+group)).games.length===0);
+ check('Excluded member cannot reuse invite',(await b.call('squads/join','POST',{token})).status===403);
+ await a.ok('squads/'+group+'/restore','POST',{profileId:bId});await b.ok('squads/join','POST',{token});
+ check('Rejoining never restores consent implicitly',!(await b.ok(path)).squad.myConsent);
+ const replay='rooms/'+(await b.ok(path+'/rematch','POST')).code;const copied=await b.ok(replay);
+ check('Deck replay works for different host after deck deletion',copied.deckName==='Questions maison'&&copied.roundCount===2&&copied.squad.id===group);
+ await b.ok(replay+'/leave','POST');
+ const guestPath='rooms/'+(await a.ok('rooms','POST',{pack:'classique',roundCount:1,duration:120,squadId:group})).code;
+ await b.ok(guestPath+'/join','POST');await guest.ok(guestPath+'/join','POST');await a.ok(guestPath+'/start','POST');
+ for(const p of [a,b,guest])await p.ok(guestPath+'/vote','POST',{round:1,rankings:{},abstain:true});await a.ok(guestPath+'/next','POST',{round:1});
+ check('Guests freely complete Squad-associated games',(await guest.ok(guestPath)).status==='finished');
+ check('Guest cannot accidentally publish to Squad',(await guest.call(guestPath+'/squad-consent','POST',{agree:true})).status===403);
+ check('Owner cannot leave before transferring',(await a.call('squads/'+group+'/leave','POST')).status===409);
+ check('Deletion blocked for group owner',(await a.call('account','DELETE',{confirmation:'SUPPRIMER',password:a.password})).status===409);
+ await a.ok('squads/'+group+'/transfer','POST',{profileId:bId});
+ check('Transfer removes old owner management powers',(await a.call('squads/'+group+'/invite','POST')).status===403);
+ await b.ok('squads/'+group,'DELETE');
+ check('Group deletion detaches rooms without deleting history',(await a.ok(path)).squad===null&&(await a.ok('stats')).games===2);
+ check('Data export includes social and purchase data',Array.isArray((await a.ok('account/export')).squads)&&Array.isArray((await a.ok('account/export')).billing.orders));
+}
