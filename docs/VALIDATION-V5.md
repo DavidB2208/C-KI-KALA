@@ -1,11 +1,11 @@
-# Validation v5 — 25 septembre 2026
+# Validation v5 — 26 septembre 2026
 
 ## Vérifications automatisées
 
 - TypeScript : `pnpm typecheck`.
 - Compilation Worker et navigateur : `pnpm build`.
 - Moteur de classement : 7 tests.
-- Worker réel et D1 jetable : 150 assertions, dont les 116 de la v4 et 34 concernant groupes/decks/droits fermés. Authentification réelle du jeu, comptes et cookies isolés.
+- Worker réel et D1 jetable : 153 assertions, dont les 116 de la v4 et 37 concernant groupes/decks/droits fermés et administration. Authentification réelle du jeu, comptes et cookies isolés.
 - Paiement : 40 assertions sur le Worker/D1 avec réponses HTTPS Stripe **simulées**. Aucun appel ni paiement Stripe réel.
 
 Les tests de paiement vérifient notamment prix imposé côté serveur, origine, CGV, signature fausse/expirée, séparation test/live, retour impayé, accès d’un autre compte, réutilisation du checkout, concurrence, doublons, 24 h non renouvelées artificiellement, partage des droits avec les invités, expiration, rematch, pack séparé, remboursement, départ d’abonnement, échec/régularisation, litige, portail et suppression pendant un checkout terminé.
@@ -25,3 +25,9 @@ Les parcours de groupes authentifiés sont couverts par l’API isolée ; ils n�
 ## Limites de la validation
 
 Pas d’audit indépendant, de certification, de test de charge représentatif, de test bancaire ou fiscal, ni de vérification d’un abonnement réel sur un cycle complet. Les statistiques sont bornées à 100 parties conservées, jusqu’à un an ; le jeu utilise un rafraîchissement périodique, pas des WebSockets. L’envoi d’e-mails de vérification n’est pas configuré ; récupération via code privé existante.
+
+## Finalisation GitHub
+
+L’ancien prototype est préservé dans une branche dédiée et la plateforme est importée sur main. Un workflow GitHub Actions à permissions de lecture, actions épinglées par commit et sans secrets de production vérifie la source, les types, le moteur, la compilation et les deux suites d’intégration. Les scripts de démarrage produisent des secrets de développement dans des chemins ignorés. Les droits exécutables des scripts shell sont conservés.
+
+Une copie propre des sources a aussi été vérifiée : génération de la configuration locale, application des cinq migrations, seconde application sans migration restante, puis compilation réussie. Cette vérification réutilisait les dépendances déjà installées ; elle ne constitue pas une installation indépendante depuis le registre npm. GitHub Actions effectue l’installation à partir du lockfile dans son propre environnement.

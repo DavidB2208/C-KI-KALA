@@ -1,5 +1,5 @@
 /** Real Worker/D1 regression cases. Caller supplies isolated test clients only. */
-export async function socialCases({Client,check,inspect}){
+export async function socialCases({Client,check,inspect,owner}){
  const a=new Client(),b=new Client(),c=new Client(),outside=new Client(),guest=new Client();
  for(const [p,n] of [[a,'Squad Alice'],[b,'Squad Bob'],[c,'Squad Chloe'],[outside,'Squad Externe']])await p.register(n);
  await guest.ok('profile','POST',{name:'Squad Invite'});
@@ -14,6 +14,10 @@ export async function socialCases({Client,check,inspect}){
  await a.ok('squads/'+group+'/revoke-invite','POST');
  check('Revoked invitations cannot join',(await outside.call('squads/join','POST',{token:invite})).status===404);
  const deck=(await a.ok('decks','POST',{name:'Questions maison',questions:['Qui ramènerait douze desserts ?','Qui perdrait le plan du groupe ?']})).id;
+ const aId=(await a.ok('me')).profile.id,adminDetail=await owner.ok('admin/users/'+aId);
+ check('Owner support sees private decks and memberships',adminDetail.decks.some(d=>d.id===deck&&d.questions.length===2)&&adminDetail.squads.some(s=>s.id===group));
+ check('Other players cannot access support detail',(await b.call('admin/users/'+aId)).status===403);
+ check('Support consultation is audited',(await inspect("SELECT id FROM admin_audit WHERE action='view-user' AND target_id=?",aId)).length>0);
  check('Decks remain private',(await b.ok('decks')).decks.length===0&&(await b.call('decks','POST',{id:deck,name:'Vol',questions:['Une autre question ?']})).status===404);
  check('Duplicate questions rejected',(await a.call('decks','POST',{name:'Doublon',questions:['Qui adore les chats ?','qui adore les chats ?']})).status===400);
  const settings={pack:'classique',roundCount:3,duration:120,themeMode:'deck',deckId:deck,squadId:group};

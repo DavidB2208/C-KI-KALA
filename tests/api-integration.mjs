@@ -284,6 +284,6 @@ try {
   check('Unranked names do not create fake memories',migrated.memories.length===0&&migrated.received[0]===0);
   check('Optional account after game retains guest history',migrated.games===1&&migrated.roundVotes===1&&(await guestHost.ok('me')).profile.id===guestProfileId);
 
-  await socialCases({Client,check,inspect});
+  await socialCases({Client,check,inspect,owner});
   console.log(JSON.stringify({passed,test:'Built Worker + isolated D1 integration'}));
 } finally { await mf.dispose(); }

@@ -1,4 +1,4 @@
-import { billingConfig } from "./billing-server";
+import { billingConfig,billingStatus } from "./billing-server";
 import { z } from "zod";
 import { database } from "./server-db";
 import { playerStats } from "./player-stats";
@@ -55,7 +55,9 @@ export async function adminRoute(request:Request,path:string[]):Promise<Response
    const sets=await rows("SELECT id,name,items,updated_at FROM saved_sets WHERE owner_id=? ORDER BY updated_at DESC",target.id);
    const summary=await playerStats(db,target.id);
    const stats={completedGames:summary.games,submittedVotes:summary.roundVotes,scope:summary.scope};
-   return respond({user:target,games:games.slice(0,25),hasMore:games.length>25,sets:sets.map(s=>({...s,items:JSON.parse(s.items)})),stats});
+   const decks=(await rows("SELECT id,name,questions,updated_at FROM question_decks WHERE owner_id=? ORDER BY updated_at DESC",target.id)).map(d=>({...d,questions:JSON.parse(d.questions)}));
+   const squads=await rows("SELECT s.id,s.name,s.owner_id,m.state,m.joined_at FROM squad_members m JOIN squads s ON s.id=m.squad_id WHERE m.profile_id=? ORDER BY m.joined_at DESC",target.id);
+   return respond({decks,squads,billing:await billingStatus(target.id),user:target,games:games.slice(0,25),hasMore:games.length>25,sets:sets.map(s=>({...s,items:JSON.parse(s.items)})),stats});
   }
   if(path[0]==="rooms"&&path.length===1){
    const games=await rows("SELECT r.code,r.status,r.pack,r.mode,r.set_name,r.current_round,r.round_count,r.created_at,r.finished_at,p.name AS host,(SELECT COUNT(*) FROM members m WHERE m.room_code=r.code) AS players FROM rooms r LEFT JOIN profiles p ON p.id=r.host_id ORDER BY r.created_at DESC LIMIT 26 OFFSET ?",offset);

@@ -15,7 +15,10 @@
     "typecheck": "tsc --noEmit",
     "test": "node --test tests/engine.test.mjs",
     "test:integration": "node tests/api-integration.mjs",
-    "test:billing": "node tests/billing-integration.mjs"
+    "test:billing": "node tests/billing-integration.mjs",
+    "setup:local": "node scripts/setup-local.mjs",
+    "db:migrate:local": "node scripts/migrate-local.mjs",
+    "check:source": "node scripts/check-source.mjs"
   },
   "dependencies": {
     "@base-ui/react": "^1.7.0",

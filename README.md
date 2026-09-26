@@ -39,6 +39,8 @@ Node ≥22.13 et pnpm, avec les versions verrouillées dans `pnpm-lock.yaml`.
 
 ```sh
 pnpm install --frozen-lockfile
+pnpm setup:local
+pnpm db:migrate:local
 pnpm dev
 pnpm typecheck
 pnpm test
@@ -68,13 +70,7 @@ L’e-mail est déclaré mais non vérifié. Le service d’e-mail transactionne
 
 ### Base de données
 
-Schéma dans `db/schema.ts`, migrations versionnées dans `drizzle/`. Après une modification : `pnpm db:generate`, examiner le SQL, puis appliquer la migration locale une seule fois. Après une compilation, pour une base locale neuve :
-
-```sh
-node --import ./scripts/sites-env.mjs ./node_modules/wrangler/bin/wrangler.js d1 execute DB --local --config dist/server/wrangler.json --persist-to .wrangler/state --file drizzle/0000_parched_talon.sql
-node --import ./scripts/sites-env.mjs ./node_modules/wrangler/bin/wrangler.js d1 execute DB --local --config dist/server/wrangler.json --persist-to .wrangler/state --file drizzle/0001_amusing_ser_duncan.sql
-node --import ./scripts/sites-env.mjs ./node_modules/wrangler/bin/wrangler.js d1 execute DB --local --config dist/server/wrangler.json --persist-to .wrangler/state --file drizzle/0002_hard_mindworm.sql
-```
+Schéma dans `db/schema.ts`, migrations versionnées dans `drizzle/`. Après une modification : `pnpm db:generate`, examiner le SQL, puis appliquer la migration locale une seule fois. Pour une base locale neuve, `pnpm db:migrate:local` applique toutes les migrations 0000 à 0004 et mémorise celles déjà appliquées. La commande force `--local` et n’accepte aucun argument pour atteindre une base distante. Si une ancienne base de développement a été créée avec les commandes SQL manuelles de la v4 sans registre de migrations, conserver une sauvegarde et utiliser une base locale neuve ; ne pas rejouer les créations de tables sur cette ancienne base.
 
 Sites fournit la liaison D1 `DB` et applique les migrations de production au déploiement. Aucun identifiant de base de production ni secret ne doit être ajouté au dépôt.
 
@@ -95,3 +91,9 @@ Sites fournit la liaison D1 `DB` et applique les migrations de production au dé
 | `tests/` | Calculs et intégration du Worker avec D1 |
 
 Les détails et limites sont dans [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md). La police Jost est distribuée avec sa licence dans `public/fonts/LICENSE.txt`.
+
+## GitHub et finalisation
+
+Dépôt : https://github.com/DavidB2208/C-KI-KALA ; l’ancien prototype PeerJS/Supabase est conservé sur `archive/prototype-before-platform`. `main` contient la plateforme D1. Le workflow GitHub Actions compile et teste le jeu sans secret de production ni transaction Stripe réelle ; il ne déploie pas automatiquement.
+
+Voir [docs/FINALISATION.md](docs/FINALISATION.md) pour les éléments achevés, les décisions écartées et les seules étapes qui nécessitent encore l’équipe ou un compte prestataire. Les guides v3/v4 sont historiques.

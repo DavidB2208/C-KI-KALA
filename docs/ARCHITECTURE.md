@@ -52,7 +52,7 @@ Une suspension exige de ressaisir le mot de passe administrateur, révoque les s
 
 - Le démarrage fige les participants et les cibles en une écriture SQL conditionnelle.
 - Les votes ne changent plus après validation. Une contrainte unique empêche les doubles soumissions, même simultanées.
-- Les membres ne lisent que leur propre bulletin avant la révélation. Les résultats exposent les agrégats, pas les bulletins nominatifs des autres.
+- Les membres ne lisent que leur propre bulletin avant la révélation. Après la révélation, les participants voient les agrégats et les bulletins nominatifs dans la salle. Les statistiques de Squad exposent uniquement les agrégats, après accord unanime.
 - Le serveur refuse un vote après le délai. Le dernier vote ou une présence périodique déclenche la révélation ; une lecture seule n’écrit pas en base.
 - L’hôte pilote la suite ; les écritures vérifient aussi son identité au moment de la modification en base.
 - Quitter transfère le rôle. Un autre participant peut le reprendre après 90 secondes sans présence de l’hôte.
@@ -70,7 +70,7 @@ Une suspension exige de ressaisir le mot de passe administrateur, révoque les s
 
 ## Vérifications reproductibles
 
-`pnpm test` vérifie six groupes de propriétés du moteur. `pnpm test:integration`, après compilation, vérifie les scénarios contre le Worker réel et D1 : comptes indépendants, activation propriétaire et migration, récupération, révocation, suspension, accès croisés, cookies, promotion invité, votes invalides et simultanés, confidentialité, calculs, questions passées, expiration, reconnexion, export et suppression. Le navigateur couvre la création d’une salle/QR, l’essai de classement et le rendu mobile à 390 px. Ces vérifications ne constituent pas un test de charge ni un audit externe.
+`pnpm test` vérifie sept groupes de propriétés du moteur. `pnpm test:integration`, après compilation, vérifie les scénarios contre le Worker réel et D1 : comptes indépendants, activation propriétaire et migration, récupération, révocation, suspension, accès croisés, cookies, promotion invité, votes invalides et simultanés, confidentialité, calculs, questions passées, expiration, reconnexion, export et suppression. Le navigateur couvre la création d’une salle/QR, l’essai de classement et le rendu mobile à 390 px. Ces vérifications ne constituent pas un test de charge ni un audit externe.
 
 ## Extension v5
 
