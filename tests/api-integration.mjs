@@ -73,6 +73,12 @@ class Client {
 }
 try {
   await mf.ready;
+  const protectedResponse = await mf.dispatchFetch(origin + '/api/me');
+  check('Proxy keeps API responses private', protectedResponse.headers.get('cache-control') === 'no-store, private');
+  check('Proxy sets security headers on HTTPS',
+    protectedResponse.headers.get('strict-transport-security') === 'max-age=31536000' &&
+    protectedResponse.headers.get('x-content-type-options') === 'nosniff' &&
+    protectedResponse.headers.get('content-security-policy')?.includes("object-src 'none'"));
   for(const migration of (await readdir('drizzle')).filter(p=>p.endsWith('.sql')).sort()){
     const sql=await readFile('drizzle/'+migration,'utf8');
     await fixture(sql.split('--> statement-breakpoint').filter(s=>s.trim()).map(s=>s.replace(/\n/g,' ')));

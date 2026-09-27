@@ -1,0 +1,31 @@
+import { NextResponse, type NextRequest } from "next/server";
+
+const contentSecurityPolicy = [
+  "default-src 'self'",
+  "script-src 'self' 'unsafe-inline'",
+  "style-src 'self' 'unsafe-inline'",
+  "img-src 'self' data: blob:",
+  "font-src 'self'",
+  "connect-src 'self'",
+  "object-src 'none'",
+  "base-uri 'self'",
+  "form-action 'self'",
+  "frame-ancestors 'self' https://chatgpt.com https://*.chatgpt.com",
+].join("; ");
+
+export function proxy(request: NextRequest) {
+  const response = NextResponse.next();
+  if (request.nextUrl.protocol === "https:") {
+    response.headers.set("Strict-Transport-Security", "max-age=31536000");
+  }
+  response.headers.set("X-Content-Type-Options", "nosniff");
+  response.headers.set("Referrer-Policy", "same-origin");
+  response.headers.set("Permissions-Policy", "camera=(), microphone=(), geolocation=()");
+  response.headers.set("Content-Security-Policy", contentSecurityPolicy);
+  if (request.nextUrl.pathname.startsWith("/api/")) {
+    response.headers.set("Cache-Control", "no-store, private");
+  }
+  return response;
+}
+
+export const config = { matcher: ["/((?!_next/static|favicon.svg).*)"] };

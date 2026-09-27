@@ -1,4 +1,6 @@
 "use client";
+import Link from "next/link";
+
 import { useState,useEffect } from "react";
 import { ArrowRight,KeyRound,LockKeyhole,ShieldCheck,Download,Copy,LogOut } from "lucide-react";
 import { Tabs,TabsList,TabsTrigger } from "@/components/ui/tabs";
@@ -29,10 +31,10 @@ export function AuthPanel({onRefresh,activation=false}:{onRefresh:()=>Promise<vo
  {(activation||recovering)&&<label className="field">{activation?"Code privé d’activation":"Code de récupération"}<input type="password" required autoComplete="off" maxLength={100} value={code} onChange={e=>setCode(e.target.value)}/></label>}
  <label className="field">{recovering?"Nouveau mot de passe":"Mot de passe"}<input type="password" required minLength={register||recovering?12:1} maxLength={128} autoComplete={register||recovering?"new-password":"current-password"} value={password} onChange={e=>setPassword(e.target.value)}/></label>
  {(register||recovering)&&<><label className="field">Confirme le mot de passe<input type="password" required minLength={12} maxLength={128} autoComplete="new-password" value={confirm} onChange={e=>setConfirm(e.target.value)}/></label><p className="help-note">Au moins 12 caractères. Une phrase longue est plus facile à retenir.</p></>}
- <ErrorNote error={error}/>{activationRequired&&!activation&&<a className="button secondary wide mt" href="/admin/activate"><ShieldCheck size={17}/>Activer mon accès administrateur</a>}<button className="button primary wide mt" disabled={busy}>{busy?"Un instant…":activation?"Activer mon compte administrateur":recovering?"Remplacer mon mot de passe":register?"Créer mon compte":"Me connecter"}<ArrowRight size={17}/></button>
- </form>{!activation&&<div className="auth-links"><button className="textlink" onClick={()=>{setMode(recovering?"login":"recover");setError("");setActivationRequired(false);}}>{recovering?"Retour à la connexion":"Mot de passe oublié ?"}</button><a className="textlink" href="/">Jouer en invité</a></div>}
+ <ErrorNote error={error}/>{activationRequired&&!activation&&<Link className="button secondary wide mt" href="/admin/activate"><ShieldCheck size={17}/>Activer mon accès administrateur</Link>}<button className="button primary wide mt" disabled={busy}>{busy?"Un instant…":activation?"Activer mon compte administrateur":recovering?"Remplacer mon mot de passe":register?"Créer mon compte":"Me connecter"}<ArrowRight size={17}/></button>
+ </form>{!activation&&<div className="auth-links"><button className="textlink" onClick={()=>{setMode(recovering?"login":"recover");setError("");setActivationRequired(false);}}>{recovering?"Retour à la connexion":"Mot de passe oublié ?"}</button><Link className="textlink" href="/">Jouer en invité</Link></div>}
  {recovering&&<p className="help-note mt">Utilise le code remis lors de ton inscription. La récupération par e-mail n’est pas encore activée.</p>}
- <p className="help-note mt">Ton e-mail reste privé. <a className="textlink" href="/privacy">Données et confidentialité</a></p></section>;
+ <p className="help-note mt">Ton e-mail reste privé. <Link className="textlink" href="/privacy">Données et confidentialité</Link></p></section>;
 }
 export function SecurityPanel({onRefresh}:{onRefresh:()=>Promise<void>}){
  const [current,setCurrent]=useState("");const [next,setNext]=useState("");const [confirm,setConfirm]=useState("");const [recovery,setRecovery]=useState("");const [error,setError]=useState("");const [busy,setBusy]=useState(false);

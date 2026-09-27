@@ -54,6 +54,7 @@ Pour les vérifications, dans un autre terminal :
 
 ```sh
 pnpm typecheck
+pnpm lint:critical
 pnpm test
 pnpm build
 pnpm test:integration

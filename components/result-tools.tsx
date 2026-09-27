@@ -2,7 +2,7 @@
 import { useState,useEffect,useId,type CSSProperties } from "react";
 import { ArrowLeft,ArrowRight,Download,BookmarkPlus,Share2,Copy } from "lucide-react";
 import { toast } from "sonner";
-import { TIERS,AVATARS,scoreTier,type Result,type RoomState } from "@/lib/game-data";
+import { TIERS,type Result,type RoomState } from "@/lib/game-data";
 import { api,errorMessage } from "@/lib/client";
 import { Avatar,ErrorNote } from "./common";
 import { resultImage } from "@/lib/result-image";
