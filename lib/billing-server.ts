@@ -15,7 +15,9 @@ const objectId=(v:any):string=>typeof v==="string"?v:v?.id??"";
 export function billingConfig(){
  const e=authConfig(),mode=e.CKK_BILLING_MODE??"off";
  const validMode=mode==="test"||mode==="live";
- const ready=validMode&&!!e.STRIPE_SECRET_KEY?.startsWith(`sk_${mode}_`)&&!!e.STRIPE_WEBHOOK_SECRET?.startsWith("whsec_")&&!!e.CKK_LEGAL_NAME&&!!e.CKK_SUPPORT_EMAIL&&!!e.CKK_APP_ORIGIN?.startsWith("https://")&&!!e.CKK_TERMS_URL?.startsWith("https://")&&e.CKK_BILLING_READY==="1";
+ const key=e.STRIPE_SECRET_KEY??"";
+ const validKey=key.startsWith(`rk_${mode}_`)||key.startsWith(`sk_${mode}_`);
+ const ready=validMode&&validKey&&!!e.STRIPE_WEBHOOK_SECRET?.startsWith("whsec_")&&!!e.CKK_LEGAL_NAME&&!!e.CKK_SUPPORT_EMAIL&&!!e.CKK_APP_ORIGIN?.startsWith("https://")&&!!e.CKK_TERMS_URL?.startsWith("https://")&&e.CKK_BILLING_READY==="1";
  return {mode,ready,checkoutOpen:e.CKK_CHECKOUT_OPEN==="1",origin:e.CKK_APP_ORIGIN??"",secret:e.STRIPE_SECRET_KEY??"",webhook:e.STRIPE_WEBHOOK_SECRET??"",merchant:e.CKK_LEGAL_NAME??null,support:e.CKK_SUPPORT_EMAIL??null,terms:e.CKK_TERMS_URL??null};
 }
 function configured(){const c=billingConfig();if(!c.ready)throw new GameError(503,"Les achats ne sont pas encore ouverts. Le jeu gratuit reste disponible.");return c;}

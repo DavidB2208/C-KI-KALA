@@ -24,7 +24,7 @@ async function provider(req){
  if(req.method==='DELETE')o.status='canceled';
  return answer(o);
 }
-const mf=new Miniflare({host:'127.0.0.1',cf:false,compatibilityDate:'2026-05-15',compatibilityFlags:['nodejs_compat'],d1Databases:{DB:'billing-tests'},bindings:{BETTER_AUTH_SECRET:randomBytes(32).toString('hex'),CKK_APP_ORIGIN:origin,CKK_BILLING_MODE:'test',CKK_BILLING_READY:'1',CKK_CHECKOUT_OPEN:'1',STRIPE_SECRET_KEY:'sk_test_isolated_not_real',STRIPE_WEBHOOK_SECRET:secret,CKK_LEGAL_NAME:'Tests uniquement',CKK_SUPPORT_EMAIL:'tests@example.test',CKK_TERMS_URL:origin+'/conditions'},outboundService:provider,modulesRoot:root,modules:[{type:'ESModule',path:resolve(root,'billing-test-entry.js'),contents:`import app from './index.js';export default {async fetch(r,e,c){if(new URL(r.url).pathname==='/fixture'){const {sql,params=[]}=await r.json();return Response.json((await e.DB.prepare(sql).bind(...params).all()).results);}return app.fetch(r,e,c);}};`},...(await readdir(root,{recursive:true})).filter(p=>/\.m?js$/.test(p)).map(p=>({type:'ESModule',path:resolve(root,p)}))]});
+const mf=new Miniflare({host:'127.0.0.1',cf:false,compatibilityDate:'2026-05-15',compatibilityFlags:['nodejs_compat'],d1Databases:{DB:'billing-tests'},bindings:{BETTER_AUTH_SECRET:randomBytes(32).toString('hex'),CKK_APP_ORIGIN:origin,CKK_BILLING_MODE:'test',CKK_BILLING_READY:'1',CKK_CHECKOUT_OPEN:'1',STRIPE_SECRET_KEY:'rk_test_isolated_not_real',STRIPE_WEBHOOK_SECRET:secret,CKK_LEGAL_NAME:'Tests uniquement',CKK_SUPPORT_EMAIL:'tests@example.test',CKK_TERMS_URL:origin+'/conditions'},outboundService:provider,modulesRoot:root,modules:[{type:'ESModule',path:resolve(root,'billing-test-entry.js'),contents:`import app from './index.js';export default {async fetch(r,e,c){if(new URL(r.url).pathname==='/fixture'){const {sql,params=[]}=await r.json();return Response.json((await e.DB.prepare(sql).bind(...params).all()).results);}return app.fetch(r,e,c);}};`},...(await readdir(root,{recursive:true})).filter(p=>/\.m?js$/.test(p)).map(p=>({type:'ESModule',path:resolve(root,p)}))]});
 let passed=0;
 function check(name,value){assert.ok(value,name);passed++;console.log('PASS',name);}
 async function sql(q,...params){const r=await mf.dispatchFetch(origin+'/fixture',{method:'POST',body:JSON.stringify({sql:q,params})});assert.equal(r.status,200,await r.clone().text());return r.json();}
@@ -48,7 +48,7 @@ const setting={pack:'anime',roundCount:1,duration:120};
 try{
  await mf.ready;for(const path of (await readdir('drizzle')).filter(p=>p.endsWith('.sql')).sort())for(const q of (await readFile('drizzle/'+path,'utf8')).split('--> statement-breakpoint').filter(s=>s.trim()))await sql(q);
  const a=new Client(),b=new Client();await a.register();await b.register();
- check('Configured test catalogue opens without exposing secrets',(await a.ok('billing/catalog')).ready&&!JSON.stringify(await a.ok('billing/catalog')).includes('sk_test'));
+ check('Configured test catalogue opens with a restricted key without exposing it',(await a.ok('billing/catalog')).ready&&!JSON.stringify(await a.ok('billing/catalog')).includes('rk_test'));
  check('Price injection rejected',(await a.call('billing/checkout','POST',{sku:'party',acceptTerms:true,amount:1})).status===400);
  check('Terms must be accepted',(await a.call('billing/checkout','POST',{sku:'party',acceptTerms:false})).status===400);
  check('Checkout rejects foreign origin',(await a.call('billing/checkout','POST',{sku:'party',acceptTerms:true},{Origin:'https://evil.test'})).status===403);
