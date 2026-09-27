@@ -1,0 +1,45 @@
+/** All clients share one browser cookie jar; only their per-tab selector differs. */
+export async function playerTabCases({Client,check}){
+ const main=new Client();await main.register('Hote onglets');
+ const mainId=(await main.ok('me')).profile.id;
+ const second=new Client(),third=new Client();
+ second.cookies=main.cookies;third.cookies=main.cookies;
+ second.headers={'X-CKK-Player':crypto.randomUUID().replaceAll('-','')};
+ third.headers={'X-CKK-Player':crypto.randomUUID().replaceAll('-','')};
+ check('New player tab ignores the main account cookie',(await second.ok('me')).profile===null);
+ check('Tab selector alone cannot access account stats',(await second.call('stats')).status===401);
+ await second.ok('profile','POST',{name:'Ariel onglet',avatar:1});
+ await third.ok('profile','POST',{name:'Isaac onglet',avatar:2});
+ const secondMe=await second.ok('me'),thirdMe=await third.ok('me');
+ check('Three tabs with a shared cookie jar have three identities',new Set([mainId,secondMe.profile.id,thirdMe.profile.id]).size===3);
+ check('Main account stays signed in and unchanged',(await main.ok('me')).profile.name==='Hote onglets'&&(await main.ok('me')).signedIn);
+ check('Independent tab is explicitly identified',secondMe.separatePlayer&&!secondMe.signedIn&&!(await main.ok('me')).separatePlayer);
+ const reload=new Client();reload.cookies=main.cookies;reload.headers=second.headers;
+ check('Reload with tab selector recovers its own guest',(await reload.ok('me')).profile.id===secondMe.profile.id);
+ const wrong=new Client();wrong.cookies=main.cookies;wrong.headers={'X-CKK-Player':'bad; cookie=injection'};
+ check('Malformed namespace cannot fall back to main account',(await wrong.call('me')).status===400);
+ const noCookie=new Client();noCookie.headers=second.headers;
+ check('A known namespace without its cookie grants no identity',(await noCookie.ok('me')).profile===null);
+ const code=(await main.ok('rooms','POST',{pack:'classique',roundCount:1,duration:120,mode:'players',themeMode:'pack'})).code,path='rooms/'+code;
+ await second.ok(path+'/join','POST');await third.ok(path+'/join','POST');
+ check('Three independent tabs join one room',(await main.ok(path)).members.length===3);
+ check('Guest tab cannot start another tab’s room',(await second.call(path+'/start','POST')).status===403);
+ await main.ok(path+'/start','POST');
+ const snapshots=await Promise.all([main.ok(path),second.ok(path),third.ok(path)]);
+ check('Each tab has a different voter identity',new Set(snapshots.map(s=>s.me)).size===3);
+ const ids=snapshots[0].targets.map(t=>t.id);
+ await main.ok(path+'/vote','POST',{round:1,rankings:Object.fromEntries(ids.filter(id=>id!==snapshots[0].me).map(id=>[id,5]))});
+ check('Other tabs cannot see or inherit the main ballot',(await second.ok(path)).myBallot===null&&(await second.ok(path)).results.length===0);
+ for(const [client,s] of [[second,snapshots[1]],[third,snapshots[2]]])await client.ok(path+'/vote','POST',{round:1,rankings:Object.fromEntries(ids.filter(id=>id!==s.me).map(id=>[id,3]))});
+ check('Three separate ballots reveal the results',(await main.ok(path)).status==='reveal'&&(await main.ok(path)).revealedBallots.length===3);
+ await main.ok(path+'/next','POST',{round:1});
+ await second.register('Ariel compte');
+ check('Account created in a tab keeps only that guest history',(await second.ok('me')).profile.id===secondMe.profile.id&&(await second.ok('stats')).games===1);
+ check('Scoped account does not replace the primary account',(await main.ok('me')).profile.id===mainId&&(await main.ok('me')).email===main.email);
+ check('Other guest tab survives account promotion',(await third.ok('me')).profile.id===thirdMe.profile.id&&!(await third.ok('me')).signedIn);
+ await second.ok('auth/sign-out','POST');
+ check('Signing out a tab does not sign out the primary account',!(await second.ok('me')).signedIn&&(await main.ok('me')).signedIn);
+ await second.login();
+ check('Independent account can sign in again',(await second.ok('me')).profile.id===secondMe.profile.id);
+ check('Browser authentication proofs remain HttpOnly cookies',!JSON.stringify(await second.ok('me')).includes('session_token'));
+}

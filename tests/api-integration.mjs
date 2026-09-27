@@ -3,6 +3,7 @@
  * Real email/password sessions exercise the same auth implementation as production.
  */
 import { socialCases } from './social-cases.mjs';
+import { playerTabCases } from './player-tab-cases.mjs';
 import { createRequire } from 'node:module';
 import { readdir, readFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
@@ -12,7 +13,7 @@ const require = createRequire(import.meta.resolve('wrangler/package.json'));
 const { Miniflare } = require('miniflare');
 const root = resolve('dist/server');
 const files = (await readdir(root, { recursive: true })).filter(p => /\.m?js$/.test(p));
-const origin = 'http://localhost';
+const origin = 'https://localhost';
 const setupCode=randomBytes(32).toString('hex');
 const ownerEmail='owner@example.test';
 const legacyId='legacy-owner-profile';
@@ -285,5 +286,6 @@ try {
   check('Optional account after game retains guest history',migrated.games===1&&migrated.roundVotes===1&&(await guestHost.ok('me')).profile.id===guestProfileId);
 
   await socialCases({Client,check,inspect,owner});
+  await playerTabCases({Client,check});
   console.log(JSON.stringify({passed,test:'Built Worker + isolated D1 integration'}));
 } finally { await mf.dispose(); }

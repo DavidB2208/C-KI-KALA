@@ -2,7 +2,9 @@
 
 Party-game web de classement entre amis, créé avec David, Ariel (Taunille Starque) et Isaac (Craftmine). Cette version reprend la direction artistique du prototype : Jost, logo centré, violet/bleu nuit et rangs S–E colorés.
 
-## Version livrée — v5
+## Version livrée — v5.1
+
+Correctif du 27 septembre : démarrage local automatique et joueurs indépendants dans plusieurs onglets. Guide de test : [docs/TEST-LOCAL.md](docs/TEST-LOCAL.md).
 
 Le détail des décisions sur les 23 points du prompt commercial est dans [docs/ANALYSE-PROMPT-V5.md](docs/ANALYSE-PROMPT-V5.md).
 
@@ -39,14 +41,20 @@ Node ≥22.13 et pnpm, avec les versions verrouillées dans `pnpm-lock.yaml`.
 
 ```sh
 pnpm install --frozen-lockfile
-pnpm setup:local
-pnpm db:migrate:local
 pnpm dev
+```
+
+Ouvrir **http://localhost:5173**. Dans une copie standard, `pnpm dev` crée la configuration de développement si elle manque puis applique les migrations locales restantes, sans remplacer les secrets ni vider la base. Le serveur reste actif dans ce terminal ; arrêter avec Ctrl+C. Si le port est occupé, le démarrage échoue explicitement : arrêter l’autre serveur ou utiliser `pnpm dev --port 5174`. Les adresses et ports de boucle locale sont acceptés uniquement avec une configuration locale.
+
+Pour les vérifications, dans un autre terminal :
+
+```sh
 pnpm typecheck
 pnpm test
 pnpm build
 pnpm test:integration
 pnpm test:billing
+pnpm test:local
 ```
 
 Le test d’intégration charge le Worker compilé et une base D1 jetable dans Miniflare. Il n’accède jamais à la production. Son contrôleur de fixtures existe uniquement dans le processus de test. Il crée de vrais comptes Better Auth et utilise les cookies de session renvoyés par le serveur, sans identité simulée.
@@ -55,7 +63,7 @@ Dans l’environnement Sites géré, utiliser les commandes du plugin pour l’a
 
 ### Configuration des comptes
 
-Copier `.env.example` vers `.dev.vars`, générer des secrets aléatoires et renseigner l’origine exacte de l’aperçu (`http://localhost:5173` avec `pnpm dev` dans une copie locale standard). Ces fichiers locaux ne sont jamais versionnés. Sur Sites, utiliser les variables de production protégées.
+Pour une installation standard, laisser `pnpm dev` générer `.dev.vars`, ou exécuter explicitement `pnpm setup:local` puis `pnpm db:migrate:local`. Ne pas remplacer ce fichier généré par `.env.example`. Une configuration déjà présente est conservée : vérifier son secret et son origine en cas d’erreur. Les fichiers locaux ne sont jamais versionnés. Sur Sites, utiliser les variables de production protégées.
 
 - `BETTER_AUTH_SECRET` : secret aléatoire de 32 octets au minimum.
 - `CKK_APP_ORIGIN` : origine HTTPS exacte du jeu publié.

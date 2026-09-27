@@ -37,3 +37,5 @@ jobs:
         run: pnpm test:integration
       - name: Test payment integration with simulated provider
         run: pnpm test:billing
+      - name: Test a clean local startup and independent player tabs
+        run: pnpm test:local

@@ -1,6 +1,8 @@
 # C KI KA LA — état de finalisation
 
-26 septembre 2026. Ce document est le point d’entrée actuel ; les documents v3 et v4 décrivent les anciennes livraisons. La matrice complète des 23 points du prompt est dans `ANALYSE-PROMPT-V5.md`.
+Mise à jour v5.1, 27 septembre 2026. Ce document est le point d’entrée actuel ; les documents v3 et v4 décrivent les anciennes livraisons. La matrice complète des 23 points du prompt est dans `ANALYSE-PROMPT-V5.md`.
+
+Le correctif v5.1 prépare automatiquement la configuration et les migrations au démarrage local, accepte les changements de port sur la boucle locale et permet plusieurs joueurs indépendants dans un navigateur. Le guide pratique et les limites sont dans `TEST-LOCAL.md`. Les fenêtres classiques gardent leur session commune ; le bouton dédié crée un autre joueur sans remplacer le profil connecté.
 
 ## Terminé dans le code
 

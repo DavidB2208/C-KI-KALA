@@ -6,6 +6,19 @@ const [command, ...args] = process.argv.slice(2);
 if (!["dev", "build"].includes(command)) throw new Error("Expected dev or build.");
 const managedLinux = readExecutionProfile() === "managed-linux";
 
+if (!managedLinux && command === "dev") {
+  // A clean clone must be usable with pnpm dev. Both helpers are local-only,
+  // preserve existing secrets/data, and migrations keep their applied ledger.
+  for (const script of ["setup-local.mjs", "migrate-local.mjs"]) {
+    const result = spawnSync(process.execPath, [fileURLToPath(new URL(script, import.meta.url))], {
+      cwd: fileURLToPath(new URL("../", import.meta.url)),
+      env: { ...process.env, CI: "true" }, stdio: "inherit",
+    });
+    if (result.error) throw result.error;
+    if (result.status !== 0) process.exit(result.status ?? 1);
+  }
+}
+
 if (managedLinux && command === "build") {
   const result = spawnSync("bash", [
     fileURLToPath(new URL("./build-verified.sh", import.meta.url)), ...args,

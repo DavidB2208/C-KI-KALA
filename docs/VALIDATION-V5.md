@@ -1,4 +1,20 @@
-# Validation v5 — 26 septembre 2026
+# Validation v5 et correctif v5.1
+
+## Correctif du 27 septembre 2026
+
+- Types et compilation vérifiés après modification de l’authentification et de l’interface.
+- Worker compilé/D1 isolée : **172 assertions**, désormais sous une origine HTTPS. Les 19 nouveaux contrôles partagent réellement le même ensemble de cookies entre trois clients et varient uniquement leur sélecteur d’onglet : identité, accès, votes distincts, reprise, création de compte avec conservation de l’historique, déconnexion et connexion indépendantes.
+- Démarrage portable réel : **9 contrôles** dans une copie neuve, avec configuration et migrations automatiques. Inscription HTTP sur un port différent du port configuré, alias de boucle locale, trois joueurs et conservation des sessions.
+- Paiements simulés : **40 assertions** ; moteur : **7 tests**. Le fournisseur Stripe reste simulé.
+- Le test local réutilise les dépendances installées. GitHub Actions effectue séparément une installation à partir du lockfile et exécute aussi `pnpm test:local`.
+
+L’inscription sur l’ancienne version a fonctionné à `localhost:5173` avec une configuration neuve. L’erreur exacte rencontrée par l’utilisateur n’a pas été fournie ; elle n’est donc pas présentée comme reproduite dans toutes ses conditions. Les dépendances manuelles au démarrage, les origines locales figées et le partage involontaire du profil entre fenêtres ont été corrigés. Le détail d’utilisation est dans `TEST-LOCAL.md`.
+
+Le navigateur d’aperçu avait une base historique sans les migrations 0002–0004 : elle a été sauvegardée puis mise à jour sans suppression de données avant la recette. Cette opération locale n’a pas touché la base publiée.
+
+Recette navigateur v5.1 : création d’une salle invitée, ouverture du deuxième puis du troisième onglet par le lien dédié, saisie de pseudos distincts et présence des trois joueurs dans la même salle. L’ouverture depuis un onglet déjà indépendant crée bien un nouvel invité.
+
+## Livraison v5 du 26 septembre 2026
 
 ## Vérifications automatisées
 

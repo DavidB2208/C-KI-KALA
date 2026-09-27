@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { identity } from "./auth";
+import { guestCookieName,sessionScope } from "./session-scope";
 import { authRoute,ensureGameProfile,requirePassword } from "./auth-routes";
 import { adminRoute } from "./admin-server";
 import { database } from "./server-db";
@@ -26,7 +27,7 @@ const run=(c:Ctx,sql:string,...a:any[])=>c.db.prepare(sql).bind(...a).run();
 const stmt=(c:Ctx,sql:string,...a:any[])=>c.db.prepare(sql).bind(...a);
 const id=()=>crypto.randomUUID();
 async function hash(value:string){const raw=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(value));return Array.from(new Uint8Array(raw),b=>b.toString(16).padStart(2,"0")).join("");}
-const cookieName=(r:Request)=>new URL(r.url).protocol==="https:"?"__Host-ckk_guest":"ckk_guest";
+const cookieName=guestCookieName;
 function cookieToken(c:Ctx){const key=cookieName(c.request);return c.request.headers.get("cookie")?.split(";").map(s=>s.trim()).find(s=>s.startsWith(key+"="))?.slice(key.length+1);}
 async function guest(c:Ctx){const token=cookieToken(c);if(!token||!/^[a-f0-9]{64}$/.test(token))return null;return one(c,"SELECT p.* FROM profiles p JOIN guest_sessions s ON p.id=s.profile_id WHERE s.token_hash=? AND s.expires_at>? AND p.auth_subject IS NULL AND p.account_id IS NULL",await hash(token),Date.now());}
 async function who(c:Ctx,required=true){const auth=await identity(c.request);let p:Row|null=null;if(auth)p=await one(c,"SELECT * FROM profiles WHERE account_id=?",auth.id);if(!p&&!auth)p=await guest(c);if(p?.suspended_at)throw new GameError(403,"Ce compte est suspendu.");if(!p&&required)throw new GameError(401,"Choisis un pseudo pour continuer.");return p;}
@@ -120,7 +121,7 @@ async function accountDelete(c:Ctx,password:unknown){const p=await requireAccoun
  ]);c.setCookie=cookieName(c.request)+"=; Path=/; HttpOnly; SameSite=Lax; Max-Age=0"+(new URL(c.request.url).protocol==="https:"?"; Secure":"");return {ok:true};}
 export async function handleApi(request:Request,segments:string[]):Promise<Response>{if(segments[0]==="squads")return squadsRoute(request,segments.slice(1));if(segments[0]==="decks")return decksRoute(request,segments.slice(1));if(segments[0]==="billing")return billingRoute(request,segments.slice(1));if(segments[0]==="auth")return authRoute(request,segments.slice(1).join("/"));if(segments[0]==="admin")return adminRoute(request,segments.slice(1));let c:Ctx|undefined;try{c={request,db:database()};const path=segments.join("/");const method=request.method;let body:any={};if(method!=="GET"){guard(c);const ip=request.headers.get("cf-connecting-ip")??"local";await rate(c,"ip:"+await hash(ip),180);if(path==="profile")await rate(c,"profile-ip:"+await hash(ip),20,600000);body=await readBody(c);}
  let result:unknown;
- if(path==="me"&&method==="GET"){const auth=await identity(c.request);const p=await who(c,false);result={signedIn:!!auth,profile:p?person(p):null,email:auth?.email??null,emailVerified:auth?.emailVerified??false,activeRooms:p?await all(c,"SELECT r.code,r.status FROM rooms r JOIN members m ON m.room_code=r.code WHERE m.profile_id=? AND m.state='joined' AND r.status NOT IN ('finished','closed') AND r.created_at>? ORDER BY r.created_at DESC LIMIT 5",p.id,Date.now()-DAY):[]};}
+ if(path==="me"&&method==="GET"){const auth=await identity(c.request);const p=await who(c,false);result={separatePlayer:!!sessionScope(c.request),signedIn:!!auth,profile:p?person(p):null,email:auth?.email??null,emailVerified:auth?.emailVerified??false,activeRooms:p?await all(c,"SELECT r.code,r.status FROM rooms r JOIN members m ON m.room_code=r.code WHERE m.profile_id=? AND m.state='joined' AND r.status NOT IN ('finished','closed') AND r.created_at>? ORDER BY r.created_at DESC LIMIT 5",p.id,Date.now()-DAY):[]};}
  else if(path==="profile"&&method==="POST")result=await profile(c,body);
  else if(path==="rooms"&&method==="POST")result=await createRoom(c,body);
  else if(segments[0]==="rooms"&&segments.length===2&&method==="GET")result=await snapshot(c,segments[1]);

@@ -3,6 +3,7 @@ import { hashPassword,verifyPassword,constantTimeEqual } from "better-auth/crypt
 import { authFor,authConfig,identity } from "./auth";
 import { database } from "./server-db";
 import { GameError } from "./game-engine";
+import { guestCookieName,readCookie } from "./session-scope";
 import { nameSchema,emailSchema,passwordSchema,sha256,randomSecret,guardRequest,limitedJson,limit } from "./server-security";
 
 const signup=z.object({name:nameSchema,email:emailSchema,password:passwordSchema,setupCode:z.string().max(100).optional()}).strict();
@@ -26,8 +27,7 @@ async function checkSetup(code:string|undefined){
  return !!existing;
 }
 async function guestProfile(request:Request){
- const key=new URL(request.url).protocol==="https:"?"__Host-ckk_guest":"ckk_guest";
- const token=request.headers.get("cookie")?.split(";").map(s=>s.trim()).find(s=>s.startsWith(key+"="))?.slice(key.length+1);
+ const token=readCookie(request,guestCookieName(request));
  if(!token||!/^[a-f0-9]{64}$/.test(token))return null;
  return database().prepare("SELECT p.id FROM profiles p JOIN guest_sessions s ON s.profile_id=p.id WHERE s.token_hash=? AND s.expires_at>? AND p.account_id IS NULL AND p.auth_subject IS NULL").bind(await sha256(token),Date.now()).first<{id:string}>();
 }
