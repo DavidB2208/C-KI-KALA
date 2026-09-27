@@ -1,10 +1,10 @@
 # C KI KA LA — rapport de préparation au lancement
 
-État vérifié le 27 septembre 2026 sur la branche `codex/prelaunch-improvements` ; ces corrections ne sont pas présumées déployées. Ce rapport distingue l'application **déjà accessible publiquement** d'une ouverture commerciale à grande échelle. Le code et les tests ne prouvent ni la capacité en charge ni la conformité juridique d'une vente.
+État du code vérifié le 27 septembre 2026 ; ces corrections ne sont pas présumées déployées sur le site du jeu. Ce rapport distingue l'application **déjà accessible publiquement** d'une ouverture commerciale à grande échelle. Le code et les tests ne prouvent ni la capacité en charge ni la conformité juridique d'une vente.
 
 ## Décision
 
-**Jeu gratuit : prêt pour une bêta contrôlée avec de vrais joueurs. Vente : pas encore prête.** Les achats sont fermés dans la configuration publiée et aucune recette marchande réelle n'a été réalisée. Ne présenter ni les offres comme achetables ni le service comme audité ou sauvegardé tant que les vérifications ci-dessous ne sont pas terminées.
+**Jeu gratuit : prêt pour une bêta contrôlée avec de vrais joueurs. Vente : pas encore prête.** Le catalogue public du 27 septembre renvoie `ready: false` et `mode: off` ; aucune recette marchande réelle n'a été réalisée. Ne présenter ni les offres comme achetables ni le service comme audité ou sauvegardé tant que les vérifications ci-dessous ne sont pas terminées.
 
 Cadrage communiqué pour cette passe : **la France est le pays visé et aucun vendeur n'est désigné dans un premier temps**. Le scénario de lancement documenté reste donc une bêta gratuite ; l'identité juridique de l'éditeur et celle d'un éventuel vendeur futur restent à préciser avant la rédaction finale des textes. Aucun accès prestataire n'est encore prêt pour la recette Stripe ou les opérations sur l'hébergement et D1 ; leurs critères de fin restent donc ouverts.
 
@@ -14,7 +14,7 @@ Cadrage communiqué pour cette passe : **la France est le pays visé et aucun ve
 | Plusieurs joueurs sur un ordinateur | Vérifié en local | 9 contrôles de démarrage, de sessions par onglet et de salle partagée. |
 | Classement de soi, résultats et statistiques | Vérifiés dans les tests | Le jeu compte l'auto-classement ; le point d'intégration qui décrit les règles aux assistants a été corrigé pour l'indiquer. |
 | Paiement | Implémenté, fermé en production | 40 contrôles avec réponses Stripe simulées ; aucune clé ou recette test/live d'un compte marchand n'a été validée ici. |
-| Hébergement | Site de jeu déjà public | Le jeu est servi sur `https://c-ki-kala.davekawaii.chatgpt.site/`. GitHub Pages reste une page statique distincte sur `https://davidb2208.github.io/C-KI-KALA/` ; elle ne peut pas servir le Worker et D1. |
+| Hébergement | Site de jeu déjà public | `https://c-ki-kala.davekawaii.chatgpt.site/` répondait HTTP 200 à une requête HEAD le 27 septembre ; cela ne valide pas un parcours de jeu. GitHub Pages reste une page statique distincte sur `https://davidb2208.github.io/C-KI-KALA/` ; elle ne peut pas servir le Worker et D1. |
 | Exploitation | Configuration de base présente | Les journaux d'erreur Worker consultés lors de la passe précédente ne contenaient pas d'événement ; cette passe n'a pas relu la production. Cela ne remplace pas la surveillance ni un test de restauration. |
 | En-têtes de sécurité | Convention `proxy.ts` adoptée | Deux nouveaux contrôles sur le Worker compilé vérifient la confidentialité des réponses API et les en-têtes HTTPS/CSP. La CSP autorise toujours les scripts et styles inline. |
 
@@ -45,7 +45,7 @@ Vérifications locales de cette passe : `pnpm check:source`, `pnpm lint:critical
 3. **Accessibilité :** vérifier clavier, lecteurs d'écran, couleurs et zoom à 200 % sur les écrans réels, en particulier le classement par tiers, les dialogues et les résultats.
 4. **Confiance des joueurs :** valider les questions avec le public choisi, préciser le traitement des signalements et les règles de modération avant une audience large.
 5. **Adresse et présentation :** choisir éventuellement un domaine propre au jeu. Tant que l'application dépend du Worker et de D1, GitHub Pages ne peut héberger que sa page de présentation ; ouvrir le jeu utilise l'origine du serveur.
-6. **En-têtes et mises à jour :** la CSP utilise encore `unsafe-inline` pour le rendu du framework. Étudier des nonces ou des empreintes après validation de compatibilité avec Vinext/Sites, puis vérifier les avis de sécurité des dépendances au moment du lancement. La migration `middleware` → `proxy` est terminée dans cette branche.
+6. **En-têtes et mises à jour :** la CSP utilise encore `unsafe-inline` pour le rendu du framework. Étudier des nonces ou des empreintes après validation de compatibilité avec Vinext/Sites, puis vérifier les avis de sécurité des dépendances au moment du lancement. La migration `middleware` → `proxy` est terminée dans le code.
 
 ## Ordre conseillé
 
