@@ -4,11 +4,13 @@
 
 Party-game web de classement entre amis, créé avec David, Ariel (Taunille Starque) et Isaac (Craftmine). Cette version reprend la direction artistique du prototype : Jost, logo centré, violet/bleu nuit et rangs S–E colorés.
 
-## Version livrée — v5.1
+## Version livrée — v5.4
 
 Correctif du 27 septembre : démarrage local automatique et joueurs indépendants dans plusieurs onglets. Guide de test : [docs/TEST-LOCAL.md](docs/TEST-LOCAL.md).
 
 Le détail des décisions sur les 23 points du prompt commercial est dans [docs/ANALYSE-PROMPT-V5.md](docs/ANALYSE-PROMPT-V5.md).
+
+Pour l'état de préparation au lancement et les actions qui restent à faire, voir le [rapport avant lancement](docs/RAPPORT-AVANT-LANCEMENT.md).
 
 - Squads privées : invitations, gestion des membres, historique et statistiques partagés après accord unanime.
 - Decks de questions privés, distincts des sets à classer.
