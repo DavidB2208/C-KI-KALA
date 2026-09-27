@@ -89,7 +89,7 @@ export async function authRoute(request:Request,path:string):Promise<Response>{
   if(creating){
    data=signup.parse(body);if(path==="activate-owner"){
     if(data.email!==authConfig().CKK_OWNER_EMAIL?.trim().toLowerCase())throw new GameError(403,"Utilise l’adresse du propriétaire du projet.");resumeActivation=await checkSetup(data.setupCode);
-   }else if(data.email===authConfig().CKK_OWNER_EMAIL?.trim().toLowerCase()&&!await db.prepare("SELECT key FROM admin_bootstrap WHERE key='owner'").first())throw new GameError(403,"Cette adresse doit utiliser l’activation administrateur.");
+   }else if(data.email===authConfig().CKK_OWNER_EMAIL?.trim().toLowerCase()&&!await db.prepare("SELECT key FROM admin_bootstrap WHERE key='owner'").first())return json({error:"Cette adresse est réservée au propriétaire. Active ton accès administrateur avec ton code privé.",code:"OWNER_ACTIVATION_REQUIRED"},403);
    await limit(db,"signup-ip:"+ip,30,3600000);
   }else if(path==="sign-in/email")data=signin.parse(body);
   else if(path==="sign-out")data={};

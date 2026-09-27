@@ -129,7 +129,9 @@ try {
   check('Registration preserves guest history identity',(await upgraded.ok('me')).profile.id===beforeUpgrade);
   const owner=new Client(true);owner.email=ownerEmail;
   const ownerBody={name:'David',email:owner.email,password:owner.password,setupCode};
-  check('Owner email requires private activation',(await owner.call('auth/sign-up/email','POST',{name:'David',email:owner.email,password:owner.password})).status===403);
+  const reservedOwner=await owner.call('auth/sign-up/email','POST',{name:'David',email:owner.email,password:owner.password});
+  check('Owner email requires private activation',reservedOwner.status===403);
+  check('Reserved owner receives an actionable activation code',reservedOwner.data.code==='OWNER_ACTIVATION_REQUIRED');
   check('Wrong activation secret denied',(await owner.call('auth/activate-owner','POST',{...ownerBody,setupCode:'wrong'})).status===403);
   check('Activation rejects non-owner email',(await owner.call('auth/activate-owner','POST',{...ownerBody,email:'impostor@example.test'})).status===403);
   await owner.ok('auth/activate-owner','POST',ownerBody);

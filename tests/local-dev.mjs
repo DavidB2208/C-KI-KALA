@@ -36,7 +36,8 @@ try{
  let ready=false;
  for(let attempt=0;attempt<240;attempt++){
   if(child.exitCode!==null)throw Error('Dev server exited');
-  if(log.includes('Local:')){try{if((await call('me')).status===200){ready=true;break;}}catch{}}
+  // Probe the actual API; ANSI-colored startup logs are not a readiness signal.
+  try{if((await call('me')).status===200){ready=true;break;}}catch{}
   await pause(250);
  }
  check('Fresh pnpm dev prepares configuration and all database migrations',ready);

@@ -15,6 +15,8 @@ La commande ne doit pas être lancée en ouvrant un fichier HTML, via Live Serve
 
 Ouvrir **Mon compte → Créer un compte**, saisir un pseudo, une adresse e-mail et un mot de passe d’au moins 12 caractères, puis confirmer le mot de passe. Conserver le code de récupération affiché. L’inscription ordinaire ne demande ni compte ChatGPT, ni clé de configuration, ni activation administrateur.
 
+Si le formulaire indique que l’adresse est réservée au propriétaire, utiliser **Activer mon accès administrateur** avec le code privé prévu pour cet environnement.
+
 `owner@example.test` est réservé à l’administrateur local. Pour tester un compte joueur, utiliser une autre adresse. L’administration se configure séparément sur `/admin/activate` avec le fichier privé `.local/owner-activation.txt` créé lors du premier démarrage ; ne jamais publier ce fichier.
 
 ## Trois joueurs dans le même navigateur

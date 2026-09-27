@@ -3,7 +3,7 @@ import { useState,useEffect } from "react";
 import { ArrowRight,KeyRound,LockKeyhole,ShieldCheck,Download,Copy,LogOut } from "lucide-react";
 import { Tabs,TabsList,TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
-import { api,errorMessage } from "@/lib/client";
+import { api,ApiError,errorMessage } from "@/lib/client";
 import { ErrorNote } from "./common";
 
 export function RecoveryNotice({code,onDone}:{code:string;onDone:()=>void}){
@@ -11,25 +11,26 @@ export function RecoveryNotice({code,onDone}:{code:string;onDone:()=>void}){
  return <section className="panel recovery-notice" role="status"><KeyRound size={28}/><h2>Garde ta clé de secours.</h2><p>Ce code permet de récupérer ton compte si tu oublies ton mot de passe. Il ne sera plus affiché ensuite.</p><code>{code}</code><div className="row"><button className="button secondary" onClick={download}><Download size={16}/>Télécharger</button><button className="button ghost" onClick={async()=>{try{await navigator.clipboard.writeText(code);toast.success("Code copié.");}catch{toast.error("Sélectionne le code pour le copier.");}}}><Copy size={16}/>Copier</button></div><p className="help-note">Conserve-le dans un endroit privé. Un nouveau code invalide le précédent.</p><button className="button primary wide mt" onClick={onDone}>J’ai conservé mon code<ArrowRight size={16}/></button></section>;
 }
 export function AuthPanel({onRefresh,activation=false}:{onRefresh:()=>Promise<void>;activation?:boolean}){
+ const [activationRequired,setActivationRequired]=useState(false);
  const [mode,setMode]=useState("login");const [name,setName]=useState("");const [email,setEmail]=useState("");const [password,setPassword]=useState("");const [confirm,setConfirm]=useState("");const [code,setCode]=useState("");const [recoveryCode,setRecoveryCode]=useState("");const [busy,setBusy]=useState(false);const [error,setError]=useState("");
  useEffect(()=>{if(!activation&&new URLSearchParams(window.location.search).get("mode")==="register")setMode("register");},[activation]);
  const register=mode==="register"||activation;const recovering=mode==="recover"&&!activation;
  if(recoveryCode)return <RecoveryNotice code={recoveryCode} onDone={async()=>{setRecoveryCode("");setPassword("");setConfirm("");setCode("");if(recovering){setMode("login");toast.success("Mot de passe remplacé. Connecte-toi.");}else{await onRefresh();if(activation)window.location.href="/admin";}}}/>;
  return <section className="panel auth-panel"><div className="eyebrow">{activation?<ShieldCheck size={16}/>:<LockKeyhole size={16}/>}{activation?"ACCÈS PROPRIÉTAIRE":"TON COMPTE C KI KA LA"}</div><h2>{activation?"Active ton administration.":recovering?"Retrouve ta place.":"Le même pseudo. Toute ton histoire."}</h2><p className="muted mt">{activation?"L’adresse du propriétaire et son code privé sont nécessaires. Choisis ton propre mot de passe.":"Tes parties, tes sets et tes statistiques te suivent sur tous tes appareils."}</p>
- {!activation&&!recovering&&<Tabs value={mode} onValueChange={v=>{setMode(v);setError("");}} className="mt"><TabsList className="auth-tabs"><TabsTrigger value="login">Connexion</TabsTrigger><TabsTrigger value="register">Créer un compte</TabsTrigger></TabsList></Tabs>}
- <form className="mt" onSubmit={async e=>{e.preventDefault();setError("");if((register||recovering)&&password!==confirm){setError("Les deux mots de passe ne correspondent pas.");return;}setBusy(true);try{
+ {!activation&&!recovering&&<Tabs value={mode} onValueChange={v=>{setMode(v);setError("");setActivationRequired(false);}} className="mt"><TabsList className="auth-tabs"><TabsTrigger value="login">Connexion</TabsTrigger><TabsTrigger value="register">Créer un compte</TabsTrigger></TabsList></Tabs>}
+ <form className="mt" onSubmit={async e=>{e.preventDefault();setError("");setActivationRequired(false);if((register||recovering)&&password!==confirm){setError("Les deux mots de passe ne correspondent pas.");return;}setBusy(true);try{
   const path=activation?"activate-owner":recovering?"recover":register?"sign-up/email":"sign-in/email";
   const body=activation?{name,email,password,setupCode:code}:recovering?{email,code,newPassword:password}:register?{name,email,password}:{email,password};
   const result=await api("auth/"+path,"POST",body);setPassword("");setConfirm("");
   if(result.recoveryCode)setRecoveryCode(result.recoveryCode);else{await onRefresh();toast.success("Te voilà connecté.");}
- }catch(e){setError(errorMessage(e));}finally{setBusy(false);}}}>
+ }catch(e){setError(errorMessage(e));setActivationRequired(e instanceof ApiError&&e.code==="OWNER_ACTIVATION_REQUIRED");}finally{setBusy(false);}}}>
  {register&&<label className="field">Ton pseudo<input autoComplete="nickname" required minLength={2} maxLength={24} value={name} onChange={e=>setName(e.target.value)}/></label>}
  <label className="field">Adresse e-mail<input type="email" required maxLength={254} autoComplete="email" value={email} onChange={e=>setEmail(e.target.value)}/></label>
  {(activation||recovering)&&<label className="field">{activation?"Code privé d’activation":"Code de récupération"}<input type="password" required autoComplete="off" maxLength={100} value={code} onChange={e=>setCode(e.target.value)}/></label>}
  <label className="field">{recovering?"Nouveau mot de passe":"Mot de passe"}<input type="password" required minLength={register||recovering?12:1} maxLength={128} autoComplete={register||recovering?"new-password":"current-password"} value={password} onChange={e=>setPassword(e.target.value)}/></label>
  {(register||recovering)&&<><label className="field">Confirme le mot de passe<input type="password" required minLength={12} maxLength={128} autoComplete="new-password" value={confirm} onChange={e=>setConfirm(e.target.value)}/></label><p className="help-note">Au moins 12 caractères. Une phrase longue est plus facile à retenir.</p></>}
- <ErrorNote error={error}/><button className="button primary wide mt" disabled={busy}>{busy?"Un instant…":activation?"Activer mon compte administrateur":recovering?"Remplacer mon mot de passe":register?"Créer mon compte":"Me connecter"}<ArrowRight size={17}/></button>
- </form>{!activation&&<div className="auth-links"><button className="textlink" onClick={()=>{setMode(recovering?"login":"recover");setError("");}}>{recovering?"Retour à la connexion":"Mot de passe oublié ?"}</button><a className="textlink" href="/">Jouer en invité</a></div>}
+ <ErrorNote error={error}/>{activationRequired&&!activation&&<a className="button secondary wide mt" href="/admin/activate"><ShieldCheck size={17}/>Activer mon accès administrateur</a>}<button className="button primary wide mt" disabled={busy}>{busy?"Un instant…":activation?"Activer mon compte administrateur":recovering?"Remplacer mon mot de passe":register?"Créer mon compte":"Me connecter"}<ArrowRight size={17}/></button>
+ </form>{!activation&&<div className="auth-links"><button className="textlink" onClick={()=>{setMode(recovering?"login":"recover");setError("");setActivationRequired(false);}}>{recovering?"Retour à la connexion":"Mot de passe oublié ?"}</button><a className="textlink" href="/">Jouer en invité</a></div>}
  {recovering&&<p className="help-note mt">Utilise le code remis lors de ton inscription. La récupération par e-mail n’est pas encore activée.</p>}
  <p className="help-note mt">Ton e-mail reste privé. <a className="textlink" href="/privacy">Données et confidentialité</a></p></section>;
 }
