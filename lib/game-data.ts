@@ -30,10 +30,11 @@ export type Target={id:string;name:string;avatar:number};
 export type Result=Target&{average:number;votes:number;sCount:number;distribution:number[]};
 export type Ranking=Record<string,number|null>;
 export type RevealedBallot={memberId:string;name:string;avatar:number;rankings:Ranking;abstained:boolean};
+export type BallotRound={number:number;question:string|null;ballots:RevealedBallot[]};
 export type RoomState={
  squad:{id:string;name:string;canConsent:boolean;myConsent:boolean;accepted:number;total:number;published:boolean}|null;deckName:string|null;visualTheme:string;myQuestionRating:1|-1|null;code:string;status:string;pack:string;roundCount:number;currentRound:number;duration:number;mode:string;themeMode:string;setName:string;
  me:string;hostId:string;members:Member[];question:string|null;deadline:number|null;serverTime:number;
- roster:string[];targets:Target[];submitted:string[];myBallot:Ranking|null;myAbstention:boolean;revealedBallots:RevealedBallot[];
+ roster:string[];targets:Target[];submitted:string[];myBallot:Ranking|null;myAbstention:boolean;revealedBallots:RevealedBallot[];ballotRounds:BallotRound[];
  results:Result[];finalResults:Result[];reportCount:number;skipped:boolean;createdAt:number;proposals:{id:string;text:string;author:string}[];
 };
 export type SavedSet={id:string;name:string;items:string[]};

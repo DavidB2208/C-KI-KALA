@@ -9,8 +9,8 @@ import { resultImage } from "@/lib/result-image";
 import { Dialog,DialogContent,DialogTitle,DialogDescription } from "@/components/ui/dialog";
 import { Checkbox } from "@/components/ui/checkbox";
 
-export function DownloadResults({results,title,subtitle}:{results:Result[];title:string;subtitle:string}){
- const [open,setOpen]=useState(false),[story,setStory]=useState(true),[names,setNames]=useState(false);
+export function DownloadResults({results,title,subtitle,label="Partager / télécharger"}:{results:Result[];title:string;subtitle:string;label?:string}){
+ const [open,setOpen]=useState(false),[story,setStory]=useState(label!=="Enregistrer la tier-list"),[names,setNames]=useState(false);
  const [asset,setAsset]=useState<{blob:Blob;url:string}|null>(null),[error,setError]=useState(""),[sharing,setSharing]=useState(false),[copyFallback,setCopyFallback]=useState("");
  const checkId=useId();const resultKey=JSON.stringify(results);
  useEffect(()=>{
@@ -24,7 +24,7 @@ export function DownloadResults({results,title,subtitle}:{results:Result[];title
   if(navigator.canShare?.({files:[file]})&&navigator.share)await navigator.share({files:[file]});
   else{download();toast("Partage de fichiers indisponible ici : utilise l’image téléchargée.");}
  }catch(e){if(!(e instanceof Error&&e.name==="AbortError"))setError("Le partage a échoué. Tu peux télécharger l’image puis l’envoyer.");}finally{setSharing(false);}}
- return <><button className="button secondary" disabled={!results.length} onClick={()=>{setNames(false);setAsset(null);setCopyFallback("");setOpen(true);}}><Share2 size={17}/>Partager / télécharger</button>
+ return <><button className="button secondary" disabled={!results.length} onClick={()=>{setNames(false);setAsset(null);setCopyFallback("");setOpen(true);}}><Download size={17}/>{label}</button>
  <Dialog open={open} onOpenChange={setOpen}><DialogContent className="game-dialog share-dialog"><DialogTitle className="dialog-title">Le souvenir de la soirée.</DialogTitle><DialogDescription>Vérifie l’aperçu avant de le partager. Demande l’accord de tes amis pour les pseudos et les questions personnelles.</DialogDescription>
  <label className="field mt">Format<select value={story?"story":"board"} onChange={e=>setStory(e.target.value==="story")}><option value="story">Story · 1080 × 1920</option><option value="board">Tier-list complète</option></select></label>
  <div className="share-name-choice"><Checkbox id={checkId} checked={names} onCheckedChange={v=>setNames(v===true)}/><label htmlFor={checkId}>Inclure les pseudos / noms des éléments</label></div>
@@ -36,10 +36,12 @@ export function DownloadResults({results,title,subtitle}:{results:Result[];title
 }
 
 export function BallotGallery({room}:{room:RoomState}){
- const [index,setIndex]=useState(0);const ballots=room.revealedBallots??[];if(!ballots.length)return null;
- const current=Math.min(index,ballots.length-1),ballot=ballots[current];
- const unranked=room.targets.filter(t=>(room.mode!=="players"||t.id!==ballot.memberId)&&ballot.rankings[t.id]==null);
- return <section className="panel mt" aria-label="Classements individuels"><div className="section-head"><div><h2>Qui a classé qui ?</h2><p className="help-note">Manche {room.currentRound} · les votes sont maintenant révélés.</p></div></div>
+ const [index,setIndex]=useState(0),[roundIndex,setRoundIndex]=useState(0);
+ const rounds=room.status==="finished"?room.ballotRounds:[{number:room.currentRound,question:room.question,ballots:room.revealedBallots}];
+ const selected=rounds[Math.min(roundIndex,rounds.length-1)];if(!selected?.ballots.length)return null;
+ const ballots=selected.ballots,current=Math.min(index,ballots.length-1),ballot=ballots[current];
+ const unranked=room.targets.filter(t=>Object.prototype.hasOwnProperty.call(ballot.rankings,t.id)&&ballot.rankings[t.id]===null);
+ return <section id={"ballots-"+room.code} className="panel mt ballot-gallery" aria-label="Classements individuels"><div className="section-head"><div><h2>Qui a classé qui ?</h2><p className="help-note">Manche {selected.number} · {selected.question??"les votes sont révélés"}</p></div>{rounds.length>1&&<label className="ballot-round-picker">Manche<select aria-label="Manche à consulter" value={selected.number} onChange={e=>{setRoundIndex(rounds.findIndex(r=>r.number===Number(e.target.value)));setIndex(0);}}>{rounds.map(r=><option key={r.number} value={r.number}>Manche {r.number}</option>)}</select></label>}</div>
   <div className="ballot-nav"><button className="button secondary small" aria-label="Classement précédent" disabled={current===0} onClick={()=>setIndex(current-1)}><ArrowLeft size={18}/></button><div className="row" aria-live="polite"><Avatar {...ballot}/><span><b>{ballot.name}</b><small className="help-note block">{current+1} / {ballots.length}</small></span></div><button className="button secondary small" aria-label="Classement suivant" disabled={current===ballots.length-1} onClick={()=>setIndex(current+1)}><ArrowRight size={18}/></button></div>
   {ballot.abstained?<p className="notice">Ce joueur a passé son vote.</p>:<><div className="tier-board compact-board">{TIERS.map(t=><div className="tier-row" key={t.key} style={{"--tier":t.color} as CSSProperties}><div className="tier-label"><strong>{t.key}</strong></div><div className="tier-content">{room.targets.filter(p=>ballot.rankings[p.id]===t.value).map(p=><div className="player-chip" key={p.id}><Avatar {...p}/><span className="chip-name">{p.name}</span></div>)}</div></div>)}</div>{unranked.length>0&&<p className="help-note mt">Non classés : {unranked.map(t=>t.name).join(" · ")}. Aucun point attribué.</p>}</>}
  </section>;

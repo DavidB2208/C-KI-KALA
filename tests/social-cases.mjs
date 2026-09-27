@@ -36,8 +36,10 @@ export async function socialCases({Client,check,inspect,owner}){
  check('Sharing consent forbidden during play',(await a.call(path+'/squad-consent','POST',{agree:true})).status===409);
  for(let round=1;round<=2;round++){
   for(const p of [a,b,c]){const room=await p.ok(path);await p.ok(path+'/vote','POST',{round,rankings:Object.fromEntries(room.targets.map(t=>[t.id,t.id===room.me?null:5]))});}
+  if(round===1)check('Next rounds remain private until final results',(await a.ok(path)).ballotRounds.length===0);
   await a.ok(path+'/next','POST',{round});
  }
+ const history=await a.ok(path);check('Final gallery contains both rounds and every submitted tier-list',history.ballotRounds.length===2&&history.ballotRounds.every((r,i)=>r.number===i+1&&r.question&&r.ballots.length===3));
  check('Completed group game private by default',(await a.ok('squads/'+group)).games.length===0);
  await a.ok(path+'/squad-consent','POST',{agree:true});await b.ok(path+'/squad-consent','POST',{agree:true});
  check('Unanimous consent required',(await a.ok('squads/'+group)).games.length===0);

@@ -164,7 +164,7 @@ try {
   const secret = await i.ok(path);
   check('Feedback forbidden before reveal',(await i.call(path+'/feedback','POST',{round:1,rating:1})).status===409);
   check('Rematch forbidden during game',(await i.call(path+'/rematch','POST')).status===409);
-  check('Other rankings remain secret before reveal', secret.myBallot === null && secret.results.length === 0 && secret.finalResults.length === 0 && secret.revealedBallots.length === 0);
+  check('Other rankings remain secret before reveal', secret.myBallot === null && secret.results.length === 0 && secret.finalResults.length === 0 && secret.revealedBallots.length === 0 && secret.ballotRounds.length === 0);
   check('Admin cannot view active ballots',(await owner.ok('admin/rooms/'+code)).ballots.length===0);
   check('Voter can recover own ballot', JSON.stringify((await h.ok(path)).myBallot) === JSON.stringify(ballot.rankings));
   check('Own ranking is recorded privately during the vote',(await h.ok(path)).myBallot[him]===3&&secret.results.length===0);
@@ -175,6 +175,7 @@ try {
   const reveal = await h.ok(path), byid = Object.fromEntries(reveal.results.map(r=>[r.id,r]));
   check('All submitted reveals round', reveal.status === 'reveal');
   check('Individual ballots only revealed afterwards',reveal.revealedBallots.length===3&&reveal.revealedBallots.some(b=>b.memberId===him&&b.rankings[im]===5));
+  check('Prior rounds gallery stays hidden until the game is finished',reveal.ballotRounds.length===0);
   check('Self rankings contribute to results and abstention is ignored', byid[him].average === 3.5 && byid[im].average === 3.5 && byid[lm].average === 2 && byid[him].votes===2 && byid[lm].votes === 2);
   check('Nonmember cannot rate questions',(await x.call(path+'/feedback','POST',{round:1,rating:1})).status===403);
   check('Feedback rejects invalid value',(await i.call(path+'/feedback','POST',{round:1,rating:5})).status===400);
@@ -189,6 +190,7 @@ try {
   statuses = await Promise.all([h.call(path+'/next','POST',{round:1}),h.call(path+'/next','POST',{round:1})]);
   check('Concurrent next advances once', statuses.map(r=>r.status).sort().join() === '200,409');
   check('Final state persisted', (await h.ok(path)).status === 'finished');
+  check('Completed game retains its individual tier-lists',(await h.ok(path)).ballotRounds.length===1&&(await h.ok(path)).ballotRounds[0].ballots.length===3);
   check('Admin can inspect completed game',(await owner.ok('admin/rooms/'+code)).ballots.length===3);
   const stats = await h.ok('stats');
   check('Account stats include the own ranking after completion', stats.games === 1 && stats.roundVotes === 1 && stats.average === 3.5 && stats.received[3] === 1 && stats.received[4] === 1);
