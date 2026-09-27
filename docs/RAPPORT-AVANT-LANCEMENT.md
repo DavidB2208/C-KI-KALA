@@ -1,24 +1,30 @@
 # C KI KA LA — rapport de préparation au lancement
 
-État du code vérifié le 27 septembre 2026 ; ces corrections ne sont pas présumées déployées sur le site du jeu. Ce rapport distingue l'application **déjà accessible publiquement** d'une ouverture commerciale à grande échelle. Le code et les tests ne prouvent ni la capacité en charge ni la conformité juridique d'une vente.
+État du code vérifié le 27 septembre 2026, avec une actualisation Stripe le 28 septembre ; ces corrections ne sont pas présumées déployées sur le site du jeu. Ce rapport distingue l'application **déjà accessible publiquement** d'une ouverture commerciale à grande échelle. Le code et les tests ne prouvent ni la capacité en charge ni la conformité juridique d'une vente.
 
 ## Décision
 
 **Jeu gratuit : prêt pour une bêta contrôlée avec de vrais joueurs. Vente : pas encore prête.** Le catalogue public du 27 septembre renvoie `ready: false` et `mode: off` ; aucune recette marchande réelle n'a été réalisée. Ne présenter ni les offres comme achetables ni le service comme audité ou sauvegardé tant que les vérifications ci-dessous ne sont pas terminées.
 
-Cadrage communiqué pour cette passe : **la France est le pays visé et aucun vendeur n'est désigné dans un premier temps**. Le scénario de lancement documenté reste donc une bêta gratuite ; l'identité juridique de l'éditeur et celle d'un éventuel vendeur futur restent à préciser avant la rédaction finale des textes. Aucun accès prestataire n'est encore prêt pour la recette Stripe ou les opérations sur l'hébergement et D1 ; leurs critères de fin restent donc ouverts.
+Cadrage communiqué pour cette passe : **la France est le pays visé et aucun vendeur n'est désigné dans un premier temps**. Le scénario de lancement documenté reste donc une bêta gratuite ; l'identité juridique de l'éditeur et celle d'un éventuel vendeur futur restent à préciser avant la rédaction finale des textes. Un compte Stripe de test est désormais accessible par OAuth, mais aucun secret de déploiement ni environnement de jeu test distinct n'est configuré pour la recette marchande.
 
 | Surface | État constaté | Preuve et limite |
 | --- | --- | --- |
 | Jeu, comptes et données | Code et tests d'intégration fonctionnels | 180 contrôles contre le Worker compilé et une D1 isolée ; pas une partie validée sur trois téléphones réels dans cette passe. |
 | Plusieurs joueurs sur un ordinateur | Vérifié en local | 9 contrôles de démarrage, de sessions par onglet et de salle partagée. |
 | Classement de soi, résultats et statistiques | Vérifiés dans les tests | Le jeu compte l'auto-classement ; le point d'intégration qui décrit les règles aux assistants a été corrigé pour l'indiquer. |
-| Paiement | Implémenté, fermé en production | 40 contrôles avec réponses Stripe simulées ; aucune clé ou recette test/live d'un compte marchand n'a été validée ici. |
+| Paiement | Implémenté, fermé en production | 40 contrôles avec réponses Stripe simulées ; un compte Stripe test est connecté, mais aucun webhook, portail ou parcours payé de bout en bout n'y a été validé. |
 | Hébergement | Site de jeu déjà public | `https://c-ki-kala.davekawaii.chatgpt.site/` répondait HTTP 200 à une requête HEAD le 27 septembre ; cela ne valide pas un parcours de jeu. GitHub Pages reste une page statique distincte sur `https://davidb2208.github.io/C-KI-KALA/` ; elle ne peut pas servir le Worker et D1. |
 | Exploitation | Configuration de base présente | Les journaux d'erreur Worker consultés lors de la passe précédente ne contenaient pas d'événement ; cette passe n'a pas relu la production. Cela ne remplace pas la surveillance ni un test de restauration. |
 | En-têtes de sécurité | Convention `proxy.ts` adoptée | Deux nouveaux contrôles sur le Worker compilé vérifient la confidentialité des réponses API et les en-têtes HTTPS/CSP. La CSP autorise toujours les scripts et styles inline. |
 
 Vérifications locales de cette passe : `pnpm check:source`, `pnpm lint:critical`, `pnpm typecheck`, `pnpm test` (8 tests), `pnpm build`, `pnpm test:integration` (180 contrôles), `pnpm test:billing` (40 contrôles) et `pnpm test:local` (9 contrôles) passent. Le workflow CI inclut désormais `pnpm lint:critical`, avec zéro avertissement autorisé sur les modules critiques de requête, d'authentification et de sécurité. Le lint global échoue encore : **90 erreurs et 18 avertissements sur 16 fichiers**, principalement typage `any` et règles React. Il n'est donc pas encore une barrière CI globale. Les flux d'interface n'ont pas été validés dans un navigateur distant pendant cette passe ; les essais sur appareils restent nécessaires.
+
+## Actualisation Stripe du 28 septembre 2026
+
+Le plugin Stripe et le serveur MCP officiel sont connectés à un compte de **test** C KI KA LA. Le plan d'intégration Stripe confirme le choix de Checkout hébergé pour les achats ponctuels, de Billing pour les abonnements à prix fixe et du portail client pour la gestion autonome. L'API de ce compte test ne liste actuellement aucun webhook ni configuration du portail. L'inventaire des sites possédés dans Sites ne montre que le site public du jeu, et ses variables de production ne contiennent aucun paramètre de facturation. Aucun achat, même en bac à sable, n'a donc été livré de bout en bout.
+
+Le Worker accepte maintenant une clé serveur Stripe restreinte `rk_test_…`/`rk_live_…`, sans retirer la compatibilité avec `sk_test_…`/`sk_live_…`. La compilation, le typage, le contrôle des sources et les 40 tests de paiement simulé passent après cette modification. Elle reste locale tant qu'elle n'est pas déployée ; la clé et le secret du webhook doivent rester dans les secrets de l'hébergement. La recette Stripe reste bloquée par l'absence de site et de base test distincts, de clé applicative de test, de webhook et de portail configurés. Avant toute vente, il faudra aussi désigner le vendeur et valider support, CGV, prix et traitement fiscal. Les contrôles de montant actuels supposent un prix fixe : ne pas activer Stripe Tax, remises ou ajustements de prix avant adaptation et tests de la vérification des factures.
 
 ## Améliorations apportées au code dans cette passe
 

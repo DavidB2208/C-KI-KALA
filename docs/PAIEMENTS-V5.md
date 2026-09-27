@@ -14,7 +14,7 @@ Conserver les secrets dans les variables d’environnement du déploiement, jama
 | --- | --- |
 | `CKK_APP_ORIGIN` | Origine HTTPS publique exacte du jeu, sans chemin ni barre finale |
 | `CKK_BILLING_MODE` | `off` par défaut ; puis `test` ou `live` |
-| `STRIPE_SECRET_KEY` | Clé secrète `sk_test_…` ou `sk_live_…` correspondant au mode |
+| `STRIPE_SECRET_KEY` | De préférence clé serveur restreinte `rk_test_…` ou `rk_live_…` correspondant au mode ; les clés `sk_test_…`/`sk_live_…` restent acceptées |
 | `STRIPE_WEBHOOK_SECRET` | Secret `whsec_…` du point de terminaison de cet environnement |
 | `CKK_LEGAL_NAME` | Identité réelle du vendeur |
 | `CKK_SUPPORT_EMAIL` | Adresse de support effectivement suivie |
@@ -23,6 +23,8 @@ Conserver les secrets dans les variables d’environnement du déploiement, jama
 | `CKK_CHECKOUT_OPEN` | `1` pour ouvrir les nouveaux achats ; `0` pour les fermer sans retirer les droits existants ni couper webhooks/portail |
 
 Il faut toutes les valeurs de configuration pour les accès et le traitement Stripe. **En cas de pause des ventes, ne pas supprimer les clés ni passer le mode sur off : mettre seulement `CKK_CHECKOUT_OPEN=0`.** Les abonnements déjà ouverts continuent autrement à exister chez Stripe. Redéployer après modification des variables de production.
+
+Pour une clé restreinte, autoriser uniquement les opérations utilisées par ce Worker : création et lecture des clients ; création, lecture et expiration des sessions Checkout ; lecture des PaymentIntents, charges, factures et paiements de facture ; lecture et résiliation des abonnements ; création des sessions du portail client. Valider ces permissions en bac à sable avant de préparer une clé live distincte. Le nom historique `STRIPE_SECRET_KEY` désigne ici la clé serveur, y compris lorsqu'elle est restreinte. Ne jamais la copier dans le dépôt ou dans une conversation.
 
 Les prix sont calculés par le serveur depuis `lib/catalog.ts`, sans prix envoyé par le client. Les Price/Product Stripe sont créés par Checkout à partir de ce catalogue ; aucun identifiant Price à saisir. Les montants encaissés sont fixes. Stripe Tax, coupons, essais gratuits, quantités multiples et changements de plan en cours de période ne sont pas intégrés. Le vendeur doit définir les taxes applicables et la présentation légale des prix avant ouverture ; ne pas activer des ajustements de prix externes sans adapter la validation serveur et les tests.
 
