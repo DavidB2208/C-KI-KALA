@@ -1,6 +1,13 @@
 # Validation v5 et correctif v5.1
 
-## Correctif du 27 septembre 2026
+## Correctif du 27 septembre 2026 : vote et statistiques
+
+- Vote de chaque joueur sur tous les noms, dont le sien ; validation serveur, résultats, statistiques de compte et tests intégrés adaptés. Les classements historiques dépourvus d’autoévaluation restent lisibles.
+- Page statistiques : relecture des données depuis la base au retour sur l’onglet et via un bouton, rappel explicite du bilan final et lien vers une salle encore active.
+- GitHub Pages redirige sur l’origine publiée qui sert le Worker et D1 ; `main` conserve la source, la CI et la page de redirection.
+- Vérifications locales : **174 assertions** Worker/D1, **40** sur Stripe simulé, **9** sur le démarrage réel et **8** tests moteur ; TypeScript et build passent.
+
+## Correctif précédent du 27 septembre 2026
 
 - Types et compilation vérifiés après modification de l’authentification et de l’interface.
 - Worker compilé/D1 isolée : **173 assertions**, désormais sous une origine HTTPS. Les 19 nouveaux contrôles partagent réellement le même ensemble de cookies entre trois clients et varient uniquement leur sélecteur d’onglet : identité, accès, votes distincts, reprise, création de compte avec conservation de l’historique, déconnexion et connexion indépendantes.

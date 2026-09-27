@@ -27,7 +27,7 @@ Le code de vente est présent en v5 ; aucun compte marchand ni encaissement rée
 
 1. Chacun ouvre le site sur son appareil et choisit son pseudo.
 2. L’un crée une partie de trois manches, les deux autres utilisent le code et le QR.
-3. Chaque joueur classe les autres ; vérifier que personne ne voit les votes avant le verdict.
+3. Chaque joueur se classe aussi lui-même ; vérifier que personne ne voit les votes avant le verdict.
 4. Pendant une manche, fermer puis rouvrir un onglet. Tester aussi une abstention et une question passée.
 5. Terminer la partie et vérifier l’historique des comptes.
 6. Refaire une partie avec un set personnalisé et la boîte à thèmes.

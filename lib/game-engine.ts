@@ -1,10 +1,10 @@
 import { type Result, type Target } from "./game-data";
 export class GameError extends Error { constructor(public status:number,message:string){super(message);} }
-export function validateBallot(rankings:Record<string,number|null>,targets:Target[],memberId:string,mode:string,abstain:boolean){
- const expected=targets.filter(t=>mode!=="players"||t.id!==memberId).map(t=>t.id);
+export function validateBallot(rankings:Record<string,number|null>,targets:Target[],_memberId:string,_mode:string,abstain:boolean){
+ const expected=targets.map(t=>t.id);
  const keys=Object.keys(rankings);
  if(abstain){if(keys.length)throw new GameError(400,"Une abstention ne contient aucun classement.");return;}
- if(keys.length!==expected.length||keys.some(k=>!expected.includes(k))||expected.some(k=>rankings[k]!==null&&(!Number.isInteger(rankings[k])||rankings[k]!<0||rankings[k]!>5)))throw new GameError(400,"Place chaque élément dans un rang ou dans Non classé, sans te classer toi-même.");
+ if(keys.length!==expected.length||keys.some(k=>!expected.includes(k))||expected.some(k=>rankings[k]!==null&&(!Number.isInteger(rankings[k])||rankings[k]!<0||rankings[k]!>5)))throw new GameError(400,"Place chaque nom dans un rang ou dans Non classé, y compris toi-même.");
  if(!Object.values(rankings).some(v=>v!==null))throw new GameError(400,"Classe au moins un élément ou passe ton vote.");
 }
 export function aggregate(targets:Target[],ballots:{rankings:string;abstained:number}[]):Result[]{

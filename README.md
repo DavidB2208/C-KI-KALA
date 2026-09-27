@@ -33,7 +33,7 @@ Le détail des décisions sur les 23 points du prompt commercial est dans [docs/
 
 ## Règles retenues
 
-L’hôte choisit le pack, 1/3/5/10/15 manches et 45/60/90/120 secondes. Les entrées sont fermées au début ; les participants inscrits peuvent revenir. Chacun classe les autres joueurs (jamais soi-même) ou les éléments du set ; il peut explicitement placer un nom dans « Non classé ». Plusieurs noms peuvent partager un rang.
+L’hôte choisit le pack, 1/3/5/10/15 manches et 45/60/90/120 secondes. Les entrées sont fermées au début ; les participants inscrits peuvent revenir. Chacun classe les joueurs, y compris soi-même, ou les éléments du set ; il peut explicitement placer un nom dans « Non classé ». Plusieurs noms peuvent partager un rang.
 
 S vaut 5, A 4, B 3, C 2, D 1, E 0. Le rang mesure combien la question correspond à la personne, pas sa valeur. Le résultat est la moyenne des votes valides reçus, arrondie pour déterminer le rang ; les égalités restent des égalités. Une abstention, un nom non classé ou une absence de vote n’est pas un E. Une question passée par l’hôte ne compte pas dans les moyennes ni dans les votes statistiques. Une partie apparaît dans l’historique quand l’hôte termine son bilan.
 
@@ -108,6 +108,6 @@ Dépôt : https://github.com/DavidB2208/C-KI-KALA ; l’ancien prototype PeerJS/
 
 Jeu en ligne : https://c-ki-kala.davekawaii.chatgpt.site
 
-L’ancien déploiement GitHub Pages peut encore publier une page statique du dépôt. Il ne peut pas exécuter le Worker, les comptes ni la base D1 de cette plateforme. Utiliser l’adresse du jeu ci-dessus ; le statut vert de « pages build and deployment » ne valide pas le fonctionnement du jeu.
+GitHub Pages utilise `index.md` pour rediriger vers le jeu publié. Toute la navigation, les liens de salle, les appels `/api`, les comptes et les statistiques fonctionnent sur cette même origine et utilisent la base D1 du site publié. GitHub Pages ne fournit pas de serveur ni de base D1 pour cette application ; son workflow vert valide seulement la redirection. La CI « Verify C KI KA LA » vérifie le jeu depuis GitHub. Publier une modification de `main` sur le site reste une opération distincte du push GitHub.
 
 Voir [docs/FINALISATION.md](docs/FINALISATION.md) pour les éléments achevés, les décisions écartées et les seules étapes qui nécessitent encore l’équipe ou un compte prestataire. Les guides v3/v4 sont historiques.

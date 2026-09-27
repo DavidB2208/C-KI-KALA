@@ -4,6 +4,8 @@ Mise à jour v5.1, 27 septembre 2026. Ce document est le point d’entrée actue
 
 Le correctif v5.1 prépare automatiquement la configuration et les migrations au démarrage local, accepte les changements de port sur la boucle locale et permet plusieurs joueurs indépendants dans un navigateur. Le guide pratique et les limites sont dans `TEST-LOCAL.md`. Les fenêtres classiques gardent leur session commune ; le bouton dédié crée un autre joueur sans remplacer le profil connecté.
 
+Les parties affichent maintenant chaque joueur dans le vote, y compris soi-même. Les statistiques d’un compte viennent des parties terminées dans D1 ; le bouton **Actualiser mes stats** relit ces données, et les salles encore actives restent accessibles depuis la page. GitHub Pages dirige les visiteurs vers la même origine que l’API et la base publiées.
+
 ## Terminé dans le code
 
 - Boucle complète de partie, codes/QR, invité sans compte, compte indépendant de ChatGPT, reprise et revanche commune.

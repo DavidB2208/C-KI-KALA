@@ -35,7 +35,7 @@ export async function socialCases({Client,check,inspect,owner}){
  check('Deck questions survive deck deletion',(await a.ok(path)).question.length>6);
  check('Sharing consent forbidden during play',(await a.call(path+'/squad-consent','POST',{agree:true})).status===409);
  for(let round=1;round<=2;round++){
-  for(const p of [a,b,c]){const room=await p.ok(path);await p.ok(path+'/vote','POST',{round,rankings:Object.fromEntries(room.targets.filter(t=>t.id!==room.me).map((t,i)=>[t.id,i?null:5]))});}
+  for(const p of [a,b,c]){const room=await p.ok(path);await p.ok(path+'/vote','POST',{round,rankings:Object.fromEntries(room.targets.map(t=>[t.id,t.id===room.me?null:5]))});}
   await a.ok(path+'/next','POST',{round});
  }
  check('Completed group game private by default',(await a.ok('squads/'+group)).games.length===0);

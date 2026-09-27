@@ -25,7 +25,7 @@ Si le formulaire indique que l’adresse est réservée au propriétaire, utilis
 2. Dans la salle, cliquer **Ajouter un joueur dans un nouvel onglet**.
 3. Saisir un deuxième pseudo, puis **Rejoindre sans compte**.
 4. Revenir à l’onglet de l’hôte et utiliser le même bouton pour le troisième joueur.
-5. Revenir à l’hôte, vérifier les trois pseudos, puis lancer la partie. Chaque onglet vote séparément.
+5. Revenir à l’hôte, vérifier les trois pseudos, puis lancer la partie. Chaque onglet classe toute la bande, soi-même compris, puis vote séparément. Après la révélation, l’hôte ouvre le bilan final pour enregistrer la partie dans les statistiques. Depuis le compte utilisé pour jouer, cliquer « Actualiser mes stats » pour relire les résultats.
 
 Si vous avez déjà ouvert une fenêtre classique et saisi le code, choisir **Jouer comme un autre joueur** dans le dialogue de participation. Sans ce choix, les fenêtres classiques retrouvent volontairement le même profil : c’est le comportement normal d’une session connectée.
 

@@ -28,9 +28,9 @@ export async function playerTabCases({Client,check}){
  const snapshots=await Promise.all([main.ok(path),second.ok(path),third.ok(path)]);
  check('Each tab has a different voter identity',new Set(snapshots.map(s=>s.me)).size===3);
  const ids=snapshots[0].targets.map(t=>t.id);
- await main.ok(path+'/vote','POST',{round:1,rankings:Object.fromEntries(ids.filter(id=>id!==snapshots[0].me).map(id=>[id,5]))});
+ await main.ok(path+'/vote','POST',{round:1,rankings:Object.fromEntries(ids.map(id=>[id,5]))});
  check('Other tabs cannot see or inherit the main ballot',(await second.ok(path)).myBallot===null&&(await second.ok(path)).results.length===0);
- for(const [client,s] of [[second,snapshots[1]],[third,snapshots[2]]])await client.ok(path+'/vote','POST',{round:1,rankings:Object.fromEntries(ids.filter(id=>id!==s.me).map(id=>[id,3]))});
+ for(const client of [second,third])await client.ok(path+'/vote','POST',{round:1,rankings:Object.fromEntries(ids.map(id=>[id,3]))});
  check('Three separate ballots reveal the results',(await main.ok(path)).status==='reveal'&&(await main.ok(path)).revealedBallots.length===3);
  await main.ok(path+'/next','POST',{round:1});
  await second.register('Ariel compte');
