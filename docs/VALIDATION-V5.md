@@ -4,7 +4,7 @@
 
 - Vote de chaque joueur sur tous les noms, dont le sien ; validation serveur, résultats, statistiques de compte et tests intégrés adaptés. Les classements historiques dépourvus d’autoévaluation restent lisibles.
 - Page statistiques : relecture des données depuis la base au retour sur l’onglet et via un bouton, rappel explicite du bilan final et lien vers une salle encore active.
-- GitHub Pages redirige sur l’origine publiée qui sert le Worker et D1 ; `main` conserve la source, la CI et la page de redirection.
+- GitHub Pages affiche une présentation sur son propre domaine et propose d’ouvrir séparément le jeu publié qui sert le Worker et D1 ; `main` conserve la source et la CI.
 - Vérifications locales : **174 assertions** Worker/D1, **40** sur Stripe simulé, **9** sur le démarrage réel et **8** tests moteur ; TypeScript et build passent.
 
 ## Correctif précédent du 27 septembre 2026

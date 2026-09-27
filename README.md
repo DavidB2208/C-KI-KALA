@@ -1,4 +1,4 @@
-[▶ **Jouer à C KI KA LA**](https://c-ki-kala.davekawaii.chatgpt.site/) · [Page GitHub Pages](https://davidb2208.github.io/C-KI-KALA/)
+[Page C KI KA LA sur GitHub Pages](https://davidb2208.github.io/C-KI-KALA/) · [Ouvrir le jeu](https://c-ki-kala.davekawaii.chatgpt.site/)
 
 # C KI KA LA — Hallila Games
 
@@ -108,6 +108,6 @@ Dépôt : https://github.com/DavidB2208/C-KI-KALA ; l’ancien prototype PeerJS/
 
 Jeu en ligne : https://c-ki-kala.davekawaii.chatgpt.site
 
-GitHub Pages utilise `index.md` pour rediriger vers le jeu publié. Toute la navigation, les liens de salle, les appels `/api`, les comptes et les statistiques fonctionnent sur cette même origine et utilisent la base D1 du site publié. GitHub Pages ne fournit pas de serveur ni de base D1 pour cette application ; son workflow vert valide seulement la redirection. La CI « Verify C KI KA LA » vérifie le jeu depuis GitHub. Publier une modification de `main` sur le site reste une opération distincte du push GitHub.
+GitHub Pages affiche une page de présentation à l’adresse `https://davidb2208.github.io/C-KI-KALA/` et ne redirige plus automatiquement. Le bouton « Ouvrir le jeu » ouvre l’application sur son hébergement actuel dans un autre onglet : GitHub Pages ne peut pas exécuter le Worker ni héberger la base D1 nécessaires aux salles, aux comptes et aux statistiques. La CI « Verify C KI KA LA » vérifie le code sur GitHub ; son résultat et le workflow Pages ne publient pas automatiquement le serveur du jeu.
 
 Voir [docs/FINALISATION.md](docs/FINALISATION.md) pour les éléments achevés, les décisions écartées et les seules étapes qui nécessitent encore l’équipe ou un compte prestataire. Les guides v3/v4 sont historiques.
