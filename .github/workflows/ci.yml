@@ -27,6 +27,8 @@ jobs:
         run: pnpm install --frozen-lockfile
       - name: Check source hygiene
         run: pnpm check:source
+      - name: Lint critical request and security modules
+        run: pnpm lint:critical
       - name: Check types
         run: pnpm typecheck
       - name: Test ranking engine
