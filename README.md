@@ -1,3 +1,5 @@
+[▶ **Jouer à C KI KA LA**](https://c-ki-kala.davekawaii.chatgpt.site/) · [Page GitHub Pages](https://davidb2208.github.io/C-KI-KALA/)
+
 # C KI KA LA — Hallila Games
 
 Party-game web de classement entre amis, créé avec David, Ariel (Taunille Starque) et Isaac (Craftmine). Cette version reprend la direction artistique du prototype : Jost, logo centré, violet/bleu nuit et rangs S–E colorés.
